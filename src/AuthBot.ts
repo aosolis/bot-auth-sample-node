@@ -6,11 +6,12 @@ import * as winston from "winston";
 // Bot Setup
 // =========================================================
 
-export class YatBot extends builder.UniversalBot {
+export class AuthBot extends builder.UniversalBot {
 
     constructor(
         public _connector: builder.IConnector,
         private botSettings: any,
+        app: any,
     )
     {
         super(_connector, botSettings);

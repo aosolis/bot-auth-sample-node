@@ -11,7 +11,7 @@ import * as msteams from "botbuilder-teams";
 import * as winston from "winston";
 import * as storage from "./storage";
 import * as utils from "./utils";
-import { YatBot } from "./YatBot";
+import { AuthBot } from "./AuthBot";
 
 // Configure instrumentation
 let instrumentationKey = config.get("app.instrumentationKey");
@@ -51,7 +51,7 @@ let connector = new msteams.TeamsChatConnector({
 let botSettings = {
     storage: botStorage,
 };
-let bot = new YatBot(connector, botSettings);
+let bot = new AuthBot(connector, botSettings, app);
 
 // Log bot errors
 bot.on("error", (error: Error) => {
