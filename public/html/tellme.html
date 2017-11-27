@@ -1,0 +1,26 @@
+<html>
+    <head>
+        <title>YatBot</title>
+    </head>
+    <body>
+        <h3>Hi, I'm Yat, Tay's more impressionable sibling!</h3>
+        <p>You had to trick Tay into saying what you wanted, but with me, there's no need to beat around the bush.</p>
+        <p>Type anything in the text box below, and I'll say it!</p>
+        <textarea id="txtWhatToSay" style="width:250px;height:150px;"></textarea>
+        <div><button onclick="submit()">Submit</button></div>
+
+        <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
+        <script src="https://statics.teams.microsoft.com/sdk/v1.0/js/MicrosoftTeams.min.js"></script>
+        <script type="text/javascript">
+            microsoftTeams.initialize();
+
+            function submit() {
+                let text = $("#txtWhatToSay").val();
+                microsoftTeams.authentication.notifySuccess(JSON.stringify({text: text}));
+            }
+        </script>
+    </body>
+    </html>

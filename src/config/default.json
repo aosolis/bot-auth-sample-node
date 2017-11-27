@@ -1,0 +1,13 @@
+{
+    "app": {
+        "baseUri": "https://example.com",
+        "instrumentationKey": ""
+    },
+    "bot": {
+        "appId": "8d03718b-3c57-425d-ae69-c92f29b0327e",
+        "appPassword": "<secret>"
+    },
+    "storage": "null",
+    "features": {
+    }
+}
