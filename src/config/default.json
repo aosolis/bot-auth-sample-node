@@ -4,10 +4,10 @@
         "instrumentationKey": ""
     },
     "bot": {
-        "appId": "8d03718b-3c57-425d-ae69-c92f29b0327e",
+        "appId": "d5ae0f8d-5ead-4d71-a525-97ee28f74416",
         "appPassword": "<secret>"
     },
-    "storage": "null",
+    "storage": "memory",
     "features": {
     }
 }

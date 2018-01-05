@@ -7,6 +7,7 @@ let http = require("http");
 let path = require("path");
 let logger = require("morgan");
 import * as config from "config";
+import * as builder from "botbuilder";
 import * as msteams from "botbuilder-teams";
 import * as winston from "winston";
 import * as storage from "./storage";
@@ -37,6 +38,9 @@ let botStorage = null;
 switch (botStorageProvider) {
     case "mongoDb":
         botStorage = new storage.MongoDbBotStorage(config.get("mongoDb.botStateCollection"), config.get("mongoDb.connectionString"));
+        break;
+    case "memory":
+        botStorage = new builder.MemoryBotStorage();
         break;
     case "null":
         botStorage = new storage.NullBotStorage();

@@ -2,8 +2,10 @@ import * as builder from "botbuilder";
 import * as msteams from "botbuilder-teams";
 import * as winston from "winston";
 
+const signinVerifyStateEventName = "signin/verifyState";
+
 // =========================================================
-// Bot Setup
+// Auth Bot
 // =========================================================
 
 export class AuthBot extends builder.UniversalBot {
@@ -30,15 +32,7 @@ export class AuthBot extends builder.UniversalBot {
 
         // Register default dialog for testing
         this.dialog("/", async (session) => {
-            let card = new builder.ThumbnailCard(session)
-                .text("Hi, I'm Tay's more impressionable sibling, Yat!")
-                .buttons([
-                    new builder.CardAction()
-                        .type("signin")
-                        .title("Tell me what to say")
-                        .value("https://97e6e8c9.ngrok.io/html/tellme.html?width=400&height=400"),
-                ]);
-            session.endDialog(new builder.Message(session).addAttachment(card));
+            session.endDialog("Hi!");
         });
     }
 
@@ -48,16 +42,10 @@ export class AuthBot extends builder.UniversalBot {
         let eventName = invokeEvent.name;
 
         switch (eventName) {
-            case "signin/verifyState":
+            case signinVerifyStateEventName:
                 let state = JSON.parse(invokeEvent.value.state);
                 let card = new builder.ThumbnailCard()
-                .text("Hi, I'm Tay's more impressionable sibling, Yat!")
-                .buttons([
-                    new builder.CardAction()
-                        .type("signin")
-                        .title("Tell me what to say")
-                        .value("https://97e6e8c9.ngrok.io/html/tellme.html?width=400&height=400"),
-                ]);
+                    .text("You're signed in!");
                 this.send(new builder.Message()
                     .address(event.address)
                     .text(state.text)

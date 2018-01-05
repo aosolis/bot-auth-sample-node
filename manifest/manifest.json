@@ -3,7 +3,7 @@
   "manifestVersion": "1.0",
   "version": "1.0",
   "id": "0b918988-5c4d-4451-a946-b52a8219f558",
-  "packageName": "com.aosolis.yatbot",
+  "packageName": "com.aosolis.teams.authbot",
   "developer": {
     "name": "Adrian Solis",
     "websiteUrl": "https://www.example.com",
@@ -11,11 +11,11 @@
     "termsOfUseUrl": "https://www.microsoft.com/en-us/servicesagreement/"
   },
   "name": {
-    "short": "YatBot"
+    "short": "Teams AuthBot"
   },
   "description": {
-    "short": "A social networking site designed specifically for the business community.",
-    "full": "A social networking site designed specifically for the business community."
+    "short": "Bot authentication sample for Microsoft Teams",
+    "full": "Bot authentication sample for Microsoft Teams"
   },
   "icons": {
     "outline": "Logo_LinkedIn_20x20.png",
@@ -28,9 +28,10 @@
   ],
   "bots": [
     {
-      "botId": "0b918988-5c4d-4451-a946-b52a8219f558",
+      "botId": "d5ae0f8d-5ead-4d71-a525-97ee28f74416",
       "scopes": [
-        "personal"
+        "personal",
+        "team"
       ]
     }
   ],
