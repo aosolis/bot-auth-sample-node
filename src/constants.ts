@@ -6,8 +6,7 @@ export const invokeType = "invoke";
 // Dialog ids
 // tslint:disable-next-line:variable-name
 export const DialogId = {
-    Auth: "/authorize",
-    Help: "Help",
+    LinkedIn: "LinkedIn",
     Root: "/",
 };
 

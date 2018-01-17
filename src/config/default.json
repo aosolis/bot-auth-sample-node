@@ -4,8 +4,12 @@
         "instrumentationKey": ""
     },
     "bot": {
-        "appId": "d5ae0f8d-5ead-4d71-a525-97ee28f74416",
+        "appId": "247aa88a-c2a5-4aa4-9e01-449bd49a2306",
         "appPassword": "<secret>"
+    },
+    "linkedIn": {
+        "clientId": "81gxxl96g7qyd4",
+        "clientSecret": "<secret>"
     },
     "storage": "memory",
     "features": {

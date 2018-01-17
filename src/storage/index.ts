@@ -5,3 +5,5 @@ export * from "./BotExtendedStorage";
 export * from "./MongoDbBotChannelStorage";
 export * from "./MongoDbBotStorage";
 export * from "./NullBotStorage";
+export * from "./AuthenticationStateStore";
+export * from "./MemoryAuthenticationStateStore";

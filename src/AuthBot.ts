@@ -1,14 +1,15 @@
 import * as builder from "botbuilder";
 import * as msteams from "botbuilder-teams";
 import * as winston from "winston";
-
-const signinVerifyStateEventName = "signin/verifyState";
+import { RootDialog } from "./dialogs/RootDialog";
 
 // =========================================================
 // Auth Bot
 // =========================================================
 
 export class AuthBot extends builder.UniversalBot {
+
+    private loadSessionAsync: {(address: builder.IAddress): Promise<builder.Session>};
 
     constructor(
         public _connector: builder.IConnector,
@@ -18,6 +19,18 @@ export class AuthBot extends builder.UniversalBot {
     {
         super(_connector, botSettings);
         this.set("persistConversationData", true);
+
+        this.loadSessionAsync = (address) => {
+            return new Promise((resolve, reject) => {
+                this.loadSession(address, (err: any, session: builder.Session) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(session);
+                    }
+                });
+            });
+        };
 
         // Handle generic invokes
         let teamsConnector = this._connector as msteams.TeamsChatConnector;
@@ -30,34 +43,29 @@ export class AuthBot extends builder.UniversalBot {
             }
         });
 
-        // Register default dialog for testing
-        this.dialog("/", async (session) => {
-            session.endDialog("Hi!");
-        });
+        // Register dialogs
+        new RootDialog().register(this);
     }
 
-    // Handle other invokes
-    private async onInvoke(event: builder.IEvent, cb: (err: Error, body: any, statusCode?: number) => void): Promise<void> {
-        let invokeEvent = event as msteams.IInvokeEvent;
-        let eventName = invokeEvent.name;
+    // Handle incoming invoke
+    private async onInvoke(event: builder.IEvent, cb: (err: Error, body: any, status?: number) => void): Promise<void> {
+        let session = await this.loadSessionAsync(event.address);
+        if (session) {
+            // Invokes don't participate in middleware
 
-        switch (eventName) {
-            case signinVerifyStateEventName:
-                let state = JSON.parse(invokeEvent.value.state);
-                let card = new builder.ThumbnailCard()
-                    .text("You're signed in!");
-                this.send(new builder.Message()
-                    .address(event.address)
-                    .text(state.text)
-                    .addAttachment(card));
-                cb(null, {}, 200);
-                break;
+            // Simulate a normal message and route it, but remember the original invoke message
+            let payload = (event as any).value;
+            let fakeMessage: any = {
+                ...event,
+                text: payload.command + " " + JSON.stringify(payload),
+                originalInvoke: event,
+            };
 
-            default:
-                let unrecognizedEvent = `Unrecognized event name: ${eventName}`;
-                winston.error(unrecognizedEvent);
-                cb(new Error(unrecognizedEvent), null, 500);
-                break;
+            session.message = fakeMessage;
+            session.dispatch(session.sessionState, session.message, () => {
+                session.routeToActiveDialog();
+            });
         }
+        cb(null, "");
     }
 }

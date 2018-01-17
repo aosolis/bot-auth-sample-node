@@ -1,5 +1,6 @@
 let appInsights = require("applicationinsights");
 let express = require("express");
+let exphbs  = require("express-handlebars");
 import { Request, Response } from "express";
 let bodyParser = require("body-parser");
 let favicon = require("serve-favicon");
@@ -13,6 +14,7 @@ import * as winston from "winston";
 import * as storage from "./storage";
 import * as utils from "./utils";
 import { AuthBot } from "./AuthBot";
+import { LinkedInApi } from "./providers/LinkedInProvider";
 
 // Configure instrumentation
 let instrumentationKey = config.get("app.instrumentationKey");
@@ -26,11 +28,17 @@ if (instrumentationKey) {
 
 let app = express();
 
-app.set("port", process.env.PORT || 3978);
+app.set("port", process.env.PORT || 3979);
 app.use(logger("dev"));
 app.use(express.static(path.join(__dirname, "../../public")));
 app.use(favicon(path.join(__dirname, "../../public/assets", "favicon.ico")));
 app.use(bodyParser.json());
+
+let handlebars = exphbs.create({
+    extname: ".hbs",
+});
+app.engine("hbs", handlebars.engine);
+app.set("view engine", "hbs");
 
 // Configure storage
 let botStorageProvider = config.get("storage");
@@ -54,6 +62,8 @@ let connector = new msteams.TeamsChatConnector({
 });
 let botSettings = {
     storage: botStorage,
+    authState: new storage.MemoryAuthenticationStateStore(),
+    linkedIn: new LinkedInApi(config.get("linkedIn.clientId"), config.get("linkedIn.clientSecret")),
 };
 let bot = new AuthBot(connector, botSettings, app);
 
@@ -64,6 +74,14 @@ bot.on("error", (error: Error) => {
 
 // Configure bot routes
 app.post("/api/messages", connector.listen());
+
+// Configure auth routes
+app.get("/auth/:provider/callback", (req, res) => {
+    res.render("oauth-callback", {
+        provider: req.params.provider,
+        originalUrl: encodeURI(req.originalUrl),
+    });
+});
 
 // Configure ping route
 app.get("/ping", (req, res) => {
