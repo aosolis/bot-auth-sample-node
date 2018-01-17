@@ -141,8 +141,20 @@ export class LinkedInDialog extends builder.IntentDialog
     private async showUserProfile(session: builder.Session): Promise<void> {
         let accessToken = this.getUserToken(session);
         if (accessToken) {
-            // TODO
-            session.send("This is where we show the user profile");
+            let profile = await this.linkedInApi.getProfileAsync(accessToken.token, [ "formatted-name", "headline", "picture-url", "public-profile-url", "location", "num-connections", "num-connections-capped" ]);
+            let profileCard = new builder.ThumbnailCard()
+                .title(profile.formattedName)
+                .subtitle(profile.headline)
+                .text(`${profile.location.name} • ${profile.numConnections}${profile.numConnectionsCapped ? "+" : ""} connections`)
+                .buttons([
+                    builder.CardAction.openUrl(session, profile.publicProfileUrl, "View on LinkedIn"),
+                ])
+                .images([
+                    new builder.CardImage()
+                        .url(profile.pictureUrl)
+                        .alt(profile.formattedName),
+                ]);
+            session.send(new builder.Message().addAttachment(profileCard));
         } else {
             session.send("Please sign in to LinkedIn so I can access your profile.");
         }
