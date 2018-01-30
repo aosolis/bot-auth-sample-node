@@ -28,7 +28,7 @@ if (instrumentationKey) {
 
 let app = express();
 
-app.set("port", process.env.PORT || 3979);
+app.set("port", process.env.PORT || 3978);
 app.use(logger("dev"));
 app.use(express.static(path.join(__dirname, "../../public")));
 app.use(favicon(path.join(__dirname, "../../public/assets", "favicon.ico")));
@@ -88,13 +88,6 @@ app.get("/ping", (req, res) => {
     res.status(200).send("OK");
 });
 
-// catch 404 and forward to error handler
-app.use((req: Request, res: Response, next: Function) => {
-    let err: any = new Error("Not Found");
-    err.status = 404;
-    next(err);
-});
-
 // error handlers
 
 // development error handler
@@ -102,11 +95,7 @@ app.use((req: Request, res: Response, next: Function) => {
 if (app.get("env") === "development") {
     app.use(function(err: any, req: Request, res: Response, next: Function): void {
         winston.error("Failed request", err);
-        res.status(err.status || 500);
-        res.render("error", {
-            message: err.message,
-            error: err,
-        });
+        res.send(err.status || 500, err);
     });
 }
 
@@ -114,11 +103,7 @@ if (app.get("env") === "development") {
 // no stacktraces leaked to user
 app.use(function(err: any, req: Request, res: Response, next: Function): void {
     winston.error("Failed request", err);
-    res.status(err.status || 500);
-    res.render("error", {
-        message: err.message,
-        error: {},
-    });
+    res.sendStatus(err.status || 500);
 });
 
 http.createServer(app).listen(app.get("port"), function (): void {
