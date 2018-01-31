@@ -11,6 +11,10 @@
         "clientId": "81gxxl96g7qyd4",
         "clientSecret": "<secret>"
     },
+    "azureAD": {
+        "appId": "247aa88a-c2a5-4aa4-9e01-449bd49a2306",
+        "appPassword": "<secret>"
+    },
     "storage": "memory",
     "features": {
     }

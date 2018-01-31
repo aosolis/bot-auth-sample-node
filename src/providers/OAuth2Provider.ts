@@ -51,7 +51,7 @@ export interface UserToken {
 export interface IOAuth2Provider {
 
     // Return the url the user should navigate to to authenticate the app
-    getAuthorizationUrl(scope?: string): AuthorizationUrl;
+    getAuthorizationUrl(extraParams?: any): AuthorizationUrl;
 
     // Redeem the authorization code for an access token
     getAccessTokenAsync(code: string): Promise<UserToken>;

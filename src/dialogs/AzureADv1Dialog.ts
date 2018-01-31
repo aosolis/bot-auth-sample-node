@@ -26,12 +26,12 @@ import * as config from "config";
 import * as constants from "../constants";
 import * as storage from "../storage";
 import * as utils from "../utils";
-import { LinkedInApi } from "../providers";
+import { AzureADv1Provider } from "../providers";
 
-// Dialog that handles dialogs for LinkedIn provider
-export class LinkedInDialog extends builder.IntentDialog
+// Dialog that handles dialogs for AzureADv1 provider
+export class AzureADv1Dialog extends builder.IntentDialog
 {
-    private linkedInApi: LinkedInApi;
+    private azureADApi: AzureADv1Provider;
     private authState: storage.IAuthenticationStateStore;
 
     constructor() {
@@ -40,8 +40,8 @@ export class LinkedInDialog extends builder.IntentDialog
 
     // Register the dialog with the bot
     public register(bot: builder.UniversalBot, rootDialog: builder.IntentDialog): void {
-        bot.dialog(constants.DialogId.LinkedIn, this);
-        this.linkedInApi = bot.get(constants.IdentityProviders.linkedIn) as LinkedInApi;
+        bot.dialog(constants.DialogId.AzureADv1, this);
+        this.azureADApi = bot.get(constants.IdentityProviders.azureADv1) as AzureADv1Provider;
         this.authState = bot.get("authState") as storage.IAuthenticationStateStore;
 
         this.onBegin((session, args, next) => { this.onDialogBegin(session, args, next); });
@@ -94,7 +94,7 @@ export class LinkedInDialog extends builder.IntentDialog
     private async promptForAction(session: builder.Session): Promise<void> {
         let msg = new builder.Message(session)
             .addAttachment(new builder.ThumbnailCard(session)
-                .title("LinkedIn")
+                .title("AzureAD (v1)")
                 .buttons([
                     builder.CardAction.messageBack(session, null, "Sign in")
                         .text("SignIn")
@@ -117,35 +117,27 @@ export class LinkedInDialog extends builder.IntentDialog
         let messageAsAny = session.message as any;
         let magicNumber = messageAsAny.originalInvoke.value.state;
 
-        utils.validateMagicNumber(session, constants.IdentityProviders.linkedIn, magicNumber);
+        utils.validateMagicNumber(session, constants.IdentityProviders.azureADv1, magicNumber);
 
-        if (utils.getUserToken(session, constants.IdentityProviders.linkedIn)) {
+        if (utils.getUserToken(session, constants.IdentityProviders.azureADv1)) {
             await this.showUserProfile(session);
         } else {
-            session.send("Sorry, there was an error signing in to LinkedIn. Please try again.");
+            session.send("Sorry, there was an error signing in to AzureADv1. Please try again.");
         }
     }
 
     // Show user profile
     private async showUserProfile(session: builder.Session): Promise<void> {
-        let accessToken = utils.getUserToken(session, constants.IdentityProviders.linkedIn);
-        if (accessToken) {
-            let profile = await this.linkedInApi.getProfileAsync(accessToken.token, [ "formatted-name", "headline", "picture-url", "public-profile-url", "location", "num-connections", "num-connections-capped" ]);
+        let userToken = utils.getUserToken(session, constants.IdentityProviders.azureADv1);
+        if (userToken) {
+            let profile = await this.azureADApi.getProfileAsync(userToken.token);
             let profileCard = new builder.ThumbnailCard()
-                .title(profile.formattedName)
-                .subtitle(profile.headline)
-                .text(`${profile.location.name} • ${profile.numConnections}${profile.numConnectionsCapped ? "+" : ""} connections`)
-                .buttons([
-                    builder.CardAction.openUrl(session, profile.publicProfileUrl, "View on LinkedIn"),
-                ])
-                .images([
-                    new builder.CardImage()
-                        .url(profile.pictureUrl)
-                        .alt(profile.formattedName),
-                ]);
+                .title(profile.displayName)
+                .subtitle(profile.mail)
+                .text(`${profile.jobTitle}<br/> ${profile.officeLocation}`);
             session.send(new builder.Message().addAttachment(profileCard));
         } else {
-            session.send("Please sign in to LinkedIn so I can access your profile.");
+            session.send("Please sign in to AzureAD so I can access your profile.");
         }
 
         await this.promptForAction(session);
@@ -153,11 +145,11 @@ export class LinkedInDialog extends builder.IntentDialog
 
     // Handle user logout request
     private async handleLogout(session: builder.Session): Promise<void> {
-        if (!utils.getUserToken(session, constants.IdentityProviders.linkedIn)) {
-            session.send("You're already signed out of LinkedIn.");
+        if (!utils.getUserToken(session, constants.IdentityProviders.azureADv1)) {
+            session.send("You're already signed out of AzureAD.");
         } else {
-            utils.setUserToken(session, constants.IdentityProviders.linkedIn, null);
-            session.send("You're now signed out of LinkedIn.");
+            utils.setUserToken(session, constants.IdentityProviders.azureADv1, null);
+            session.send("You're now signed out of AzureAD.");
         }
 
         await this.promptForAction(session);
@@ -165,23 +157,23 @@ export class LinkedInDialog extends builder.IntentDialog
 
     // Handle user login request
     private async handleLogin(session: builder.Session): Promise<void> {
-        if (utils.getUserToken(session, constants.IdentityProviders.linkedIn)) {
-            session.send("You're already signed in to LinkedIn.");
+        if (utils.getUserToken(session, constants.IdentityProviders.azureADv1)) {
+            session.send("You're already signed in to AzureAD.");
             await this.promptForAction(session);
         } else {
-            // Build auth url for LinkedIn
-            let authInfo = this.linkedInApi.getAuthorizationUrl();
+            // Build auth url for AzureADv1
+            let authInfo = this.azureADApi.getAuthorizationUrl();
 
             // Set up the OAuth state under the generated auth state key
             await this.authState.setAsync(authInfo.state, JSON.stringify(session.message.address));
-            utils.setOAuthStateKey(session, constants.IdentityProviders.linkedIn, authInfo.state);
+            utils.setOAuthStateKey(session, constants.IdentityProviders.azureADv1, authInfo.state);
             session.save().sendBatch();
 
             // Send card with signin action
             let authUrl = config.get("app.baseUri") + `/html/auth-start.html?authorizationUrl=${encodeURIComponent(authInfo.url)}`;
             let msg = new builder.Message(session)
                 .addAttachment(new builder.HeroCard(session)
-                    .text("Click below to sign in to LinkedIn")
+                    .text("Click below to sign in to AzureAD")
                     .buttons([
                         new builder.CardAction(session)
                             .type("signin")

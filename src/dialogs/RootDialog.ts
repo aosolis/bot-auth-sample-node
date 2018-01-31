@@ -24,6 +24,7 @@
 import * as builder from "botbuilder";
 import * as constants from "../constants";
 import { LinkedInDialog } from "./LinkedInDialog";
+import { AzureADv1Dialog } from "./AzureADv1Dialog";
 
 // Root dialog provides choices in identity providers
 export class RootDialog extends builder.IntentDialog
@@ -40,7 +41,14 @@ export class RootDialog extends builder.IntentDialog
         this.onDefault((session) => { this.onMessageReceived(session); });
 
         new LinkedInDialog().register(bot, this);
-        this.matches(/linkedin/i, constants.DialogId.LinkedIn);
+        new AzureADv1Dialog().register(bot, this);
+        this.matches(/linkedIn/i, constants.DialogId.LinkedIn);
+        this.matches(/azureADv1/i, constants.DialogId.AzureADv1);
+    }
+
+    // Handle resumption of dialog
+    public dialogResumed<T>(session: builder.Session, result: builder.IDialogResult<T>): void {
+        this.promptForIdentityProvider(session);
     }
 
     // Handle start of dialog
@@ -68,6 +76,9 @@ export class RootDialog extends builder.IntentDialog
                 .title("Select an identity provider")
                 .buttons([
                     builder.CardAction.imBack(session, "LinkedIn", "LinkedIn"),
+                    builder.CardAction.messageBack(session, null, "AzureAD (v1)")
+                        .displayText("AzureAD (v1)")
+                        .text("AzureADv1"),
                 ]));
         session.send(msg);
     }

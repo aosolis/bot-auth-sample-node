@@ -5,23 +5,28 @@
 <body>
     <script src="https://statics.teams.microsoft.com/sdk/v1.0/js/MicrosoftTeams.min.js"></script>
     <script type="text/javascript">
-          microsoftTeams.initialize();
+        microsoftTeams.initialize();
 
-          // Parse query parameters
-          let queryParams = {};
-          location.search.substr(1).split("&").forEach(function(item) {
-              let s = item.split("="),
-              k = s[0],
-              v = s[1] && decodeURIComponent(s[1]);
-              queryParams[k] = v;
-          });
+        // Parse query parameters
+        let queryParams = {};
+        location.search.substr(1).split("&").forEach(function(item) {
+            let s = item.split("="),
+            k = s[0],
+            v = s[1] && decodeURIComponent(s[1]);
+            queryParams[k] = v;
+        });
 
-          let authorizationUrl = queryParams["authorizationUrl"];
-          if (!authorizationUrl || !authorizationUrl.match(/^https:\/\/www\.linkedin\.com\/oauth\/v2\/authorization\?/)) {
-              microsoftTeams.authentication.notifyFailure("Invalid authorization url");
-          } else {
-              window.location = authorizationUrl;
-          }
+        function isValidAuthorizationUrl(url) {
+            return url.match(/^https:\/\/www\.linkedin\.com\/oauth\/v2\/authorization\?/) ||
+                url.match(/^https:\/\/login\.microsoftonline\.com\/common\/oauth2\/authorize\?/);
+        }
+
+        let authorizationUrl = queryParams["authorizationUrl"];
+        if (!authorizationUrl || !isValidAuthorizationUrl(authorizationUrl)) {
+            microsoftTeams.authentication.notifyFailure("Invalid authorization url");
+        } else {
+            window.location = authorizationUrl;
+        }
     </script>
 </body>
 </html>

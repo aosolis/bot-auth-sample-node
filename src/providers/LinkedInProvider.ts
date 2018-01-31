@@ -53,15 +53,15 @@ export class LinkedInApi implements IOAuth2Provider {
     }
 
     // Return the url the user should navigate to to authenticate the app
-    public getAuthorizationUrl(scope?: string): AuthorizationUrl {
+    public getAuthorizationUrl(extraParams?: any): AuthorizationUrl {
         let params = {
             response_type: "code",
             client_id: this.clientId,
             redirect_uri: config.get("app.baseUri") + callbackPath,
             state: uuidv4(),
         } as any;
-        if (scope) {
-            params.scope = scope;
+        if (extraParams) {
+            params = { ...extraParams, ...params };
         }
 
         return {

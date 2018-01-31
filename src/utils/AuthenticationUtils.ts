@@ -64,3 +64,24 @@ export function setOAuthStateKey(session: builder.Session, providerName: string,
     data.oauthState = state;
     session.save().sendBatch();
 }
+
+// Validates the received magic number against what is expected
+export function validateMagicNumber(session: builder.Session, providerName: string, magicNumber: string): void {
+    let tokenUnsafe = getUserTokenUnsafe(session, providerName);
+    if (!tokenUnsafe.magicNumberVerified) {
+        if ((tokenUnsafe.magicNumber === magicNumber) &&
+            (tokenUnsafe.magicNumberExpirationTime > Date.now())) {
+            tokenUnsafe.magicNumberVerified = true;
+        } else {
+            console.warn("Magic number does not match.");
+            delete tokenUnsafe.magicNumber;
+            delete tokenUnsafe.magicNumberVerified;
+            delete tokenUnsafe.magicNumberExpirationTime;
+        }
+
+        // Save the token information back to userData
+        setUserToken(session, providerName, tokenUnsafe);
+    } else {
+        console.warn("Received unexpected login callback.");
+    }
+}

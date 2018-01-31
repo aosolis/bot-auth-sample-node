@@ -36,8 +36,8 @@ import * as msteams from "botbuilder-teams";
 import * as winston from "winston";
 import * as storage from "./storage";
 import * as utils from "./utils";
+import * as providers from "./providers";
 import { AuthBot } from "./AuthBot";
-import { LinkedInApi } from "./providers/LinkedInProvider";
 
 // Configure instrumentation
 let instrumentationKey = config.get("app.instrumentationKey");
@@ -86,7 +86,8 @@ let connector = new msteams.TeamsChatConnector({
 let botSettings = {
     storage: botStorage,
     authState: new storage.MemoryAuthenticationStateStore(),
-    linkedIn: new LinkedInApi(config.get("linkedIn.clientId"), config.get("linkedIn.clientSecret")),
+    linkedIn: new providers.LinkedInApi(config.get("linkedIn.clientId"), config.get("linkedIn.clientSecret")),
+    azureADv1: new providers.AzureADv1Provider(config.get("azureAD.appId"), config.get("azureAD.appPassword")),
 };
 let bot = new AuthBot(connector, botSettings, app);
 
