@@ -25,30 +25,11 @@ import * as request from "request";
 import * as config from "config";
 import * as querystring from "querystring";
 let uuidv4 = require("uuid/v4");
+import { AuthorizationUrl, UserToken, IOAuth2Provider } from "./OAuth2Provider";
 
 // =========================================================
 // LinkedIn API
 // =========================================================
-
-export interface AuthorizationUrl {
-    // Url where user can grant authorization
-    url: string;
-    // OAuth state parameter embedded in the url
-    state: string;
-}
-
-export interface UserToken {
-    // Access token
-    token: string;
-    // Approximate expiration time of the access token, expressed as a number of milliseconds from midnight, January 1, 1970 Universal Coordinated Time (UTC)
-    expirationTime: number;
-    // Verification code
-    magicNumber?: string;
-    // Has code been verified?
-    magicNumberVerified?: boolean;
-    // Expiration time of magic number, expressed as a number of milliseconds from midnight, January 1, 1970 Universal Coordinated Time (UTC)
-    magicNumberExpirationTime?: number;
-}
 
 export type ProfileField = "id" |
     "first-name" | "last-name" | "maiden-name" | "formatted-name" |
@@ -62,7 +43,7 @@ const authorizationUrl = "https://www.linkedin.com/oauth/v2/authorization";
 const accessTokenUrl = "https://www.linkedin.com/oauth/v2/accessToken";
 const callbackPath = "/auth/linkedIn/callback";
 
-export class LinkedInApi {
+export class LinkedInApi implements IOAuth2Provider {
 
     constructor(
         private clientId: string,

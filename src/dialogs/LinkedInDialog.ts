@@ -25,12 +25,12 @@ import * as builder from "botbuilder";
 import * as config from "config";
 import * as constants from "../constants";
 import * as storage from "../storage";
-import * as linkedin from "../providers/LinkedInProvider";
+import { UserToken, LinkedInApi } from "../providers";
 
 // Dialog that handles dialogs for LinkedIn provider
 export class LinkedInDialog extends builder.IntentDialog
 {
-    private linkedInApi: linkedin.LinkedInApi;
+    private linkedInApi: LinkedInApi;
     private authState: storage.IAuthenticationStateStore;
 
     constructor() {
@@ -40,7 +40,7 @@ export class LinkedInDialog extends builder.IntentDialog
     // Register the dialog with the bot
     public register(bot: builder.UniversalBot, rootDialog: builder.IntentDialog): void {
         bot.dialog(constants.DialogId.LinkedIn, this);
-        this.linkedInApi = bot.get("linkedIn") as linkedin.LinkedInApi;
+        this.linkedInApi = bot.get(constants.IdentityProviders.linkedIn) as LinkedInApi;
         this.authState = bot.get("authState") as storage.IAuthenticationStateStore;
 
         this.onBegin((session, args, next) => { this.onDialogBegin(session, args, next); });
@@ -199,16 +199,16 @@ export class LinkedInDialog extends builder.IntentDialog
         }
     }
 
-    private getUserToken(session: builder.Session): linkedin.UserToken {
+    private getUserToken(session: builder.Session): UserToken {
         let token = this.getUserTokenUnsafe(session);
         return (token && token.magicNumberVerified) ? token : null;
     }
 
-    private getUserTokenUnsafe(session: builder.Session): linkedin.UserToken {
+    private getUserTokenUnsafe(session: builder.Session): UserToken {
         return (session.userData.linkedIn && session.userData.linkedIn.userToken);
     }
 
-    private setUserToken(session: builder.Session, token: linkedin.UserToken): void {
+    private setUserToken(session: builder.Session, token: UserToken): void {
         let data = session.userData.linkedIn || {};
         data.userToken = token;
         session.userData.linkedIn = data;

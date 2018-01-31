@@ -5,7 +5,7 @@ import * as storage from "./storage";
 import * as utils from "./utils";
 import { Request, Response } from "express";
 import { RootDialog } from "./dialogs/RootDialog";
-import { LinkedInApi } from "./providers/LinkedInProvider";
+import { IOAuth2Provider } from "./providers";
 const randomNumber = require("random-number-csprng");
 
 // =========================================================
@@ -57,7 +57,7 @@ export class AuthBot extends builder.UniversalBot {
 
     // Handle OAuth callbacks
     public async handleOAuthCallback(req: Request, res: Response, providerName: string): Promise<void> {
-        const provider = this.botSettings[providerName] as LinkedInApi;
+        const provider = this.botSettings[providerName] as IOAuth2Provider;
         const state = req.query.state;
         const authCode = req.query.code;
         let magicNumber = "";
