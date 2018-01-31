@@ -31,6 +31,9 @@ import { RootDialog } from "./dialogs/RootDialog";
 import { IOAuth2Provider } from "./providers";
 const randomNumber = require("random-number-csprng");
 
+// How long the magic number is valid
+const magicNumberValidityInMilliseconds = 10 * 60 * 1000;       // 10 minutes
+
 // =========================================================
 // Auth Bot
 // =========================================================
@@ -105,13 +108,13 @@ export class AuthBot extends builder.UniversalBot {
         }
 
         if (session &&
-            (session.userData.oauthState === state) &&      // OAuth state matches what we expect
-            authCode) {                                     // User granted authorization
+            (utils.getOAuthStateKey(session, providerName) === state) &&        // OAuth state matches what we expect
+            authCode) {                                                         // User granted authorization
             try {
                 let userToken = await provider.getAccessTokenAsync(authCode);
                 userToken.magicNumberVerified = false;
                 userToken.magicNumber = await this.generateMagicNumber();
-                userToken.magicNumberExpirationTime = Date.now() + (10 * 60 * 1000);    // expires after 10 minutes
+                userToken.magicNumberExpirationTime = Date.now() + magicNumberValidityInMilliseconds;
                 utils.setUserToken(session, providerName, userToken);
 
                 magicNumber = userToken.magicNumber;

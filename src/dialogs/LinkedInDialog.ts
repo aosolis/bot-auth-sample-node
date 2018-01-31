@@ -179,14 +179,16 @@ export class LinkedInDialog extends builder.IntentDialog
             session.send("You're already signed in to LinkedIn.");
             await this.promptForAction(session);
         } else {
-            // Get auth url and set up auth state
-            let linkedInUrl = this.linkedInApi.getAuthorizationUrl();
-            session.userData.oauthState = linkedInUrl.state;
-            await this.authState.setAsync(linkedInUrl.state, JSON.stringify(session.message.address));
+            // Build auth url from LinkedIn
+            let authInfo = this.linkedInApi.getAuthorizationUrl();
+
+            // Set up the OAuth state under the generated auth state key
+            await this.authState.setAsync(authInfo.state, JSON.stringify(session.message.address));
+            utils.setOAuthStateKey(session, constants.IdentityProviders.linkedIn, authInfo.state);
             session.save().sendBatch();
 
             // Send card with signin action
-            let authUrl = config.get("app.baseUri") + `/html/auth-start.html?authorizationUrl=${encodeURIComponent(linkedInUrl.url)}`;
+            let authUrl = config.get("app.baseUri") + `/html/auth-start.html?authorizationUrl=${encodeURIComponent(authInfo.url)}`;
             let msg = new builder.Message(session)
                 .addAttachment(new builder.HeroCard(session)
                     .text("Click below to sign in to LinkedIn")

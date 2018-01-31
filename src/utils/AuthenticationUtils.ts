@@ -50,3 +50,17 @@ export function setUserToken(session: builder.Session, providerName: string, tok
     data.userToken = token;
     session.save().sendBatch();
 }
+
+// Gets the OAuth state for the given provider
+export function getOAuthStateKey(session: builder.Session, providerName: string): string {
+    ensureProviderData(session, providerName);
+    return (session.userData[providerName].oauthState);
+}
+
+// Sets the OAuth state for the given provider
+export function setOAuthStateKey(session: builder.Session, providerName: string, state: string): void {
+    ensureProviderData(session, providerName);
+    let data = session.userData[providerName];
+    data.oauthState = state;
+    session.save().sendBatch();
+}
