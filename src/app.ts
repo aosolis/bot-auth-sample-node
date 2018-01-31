@@ -77,10 +77,7 @@ app.post("/api/messages", connector.listen());
 
 // Configure auth routes
 app.get("/auth/:provider/callback", (req, res) => {
-    res.render("oauth-callback", {
-        provider: req.params.provider,
-        originalUrl: encodeURI(req.originalUrl),
-    });
+    bot.handleOAuthCallback(req, res, req.params["provider"]);
 });
 
 // Configure ping route

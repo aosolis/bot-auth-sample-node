@@ -23,7 +23,6 @@
 
 import * as builder from "botbuilder";
 import * as config from "config";
-import * as querystring from "querystring";
 import * as constants from "../constants";
 import * as storage from "../storage";
 import * as linkedin from "../providers/LinkedInProvider";
@@ -111,29 +110,21 @@ export class LinkedInDialog extends builder.IntentDialog
     // Handle user login callback
     private async handleLoginCallback(session: builder.Session): Promise<void> {
         let messageAsAny = session.message as any;
-        let url = messageAsAny.originalInvoke.value.state;
+        let magicNumber = messageAsAny.originalInvoke.value.state;
 
-        let queryString = url.substring( url.indexOf("?") + 1 );
-        let queryParams = querystring.parse(queryString);
-        let code = queryParams["code"];
-        let state = queryParams["state"];
-
-        if ((session.userData.oauthState === state) &&      // OAuth state matches what we expect
-            code) {                                         // User granted authorization
-            try {
-                let userToken = await this.linkedInApi.getAccessTokenAsync(code);
-                this.setUserToken(session, userToken);
-            } catch (e) {
-                console.error("Failed to redeem code for an access token", e);
-            }
+        let tokenUnsafe = this.getUserTokenUnsafe(session);
+        if (!tokenUnsafe.magicNumberVerified &&
+            (tokenUnsafe.magicNumber === magicNumber)) {
+            tokenUnsafe.magicNumberVerified = true;
+            this.setUserToken(session, tokenUnsafe);
         } else {
-            console.warn("State does not match expected state parameter, or user denied authorization");
+            console.warn("Magic number does not match.");
         }
 
         if (this.getUserToken(session)) {
             await this.showUserProfile(session);
         } else {
-            session.send("Sorry, there was an error getting a token for LinkedIn. Please try again.");
+            session.send("Sorry, there was an error signing in to LinkedIn. Please try again.");
         }
     }
 
@@ -202,6 +193,11 @@ export class LinkedInDialog extends builder.IntentDialog
     }
 
     private getUserToken(session: builder.Session): linkedin.UserToken {
+        let token = this.getUserTokenUnsafe(session);
+        return (token && token.magicNumberVerified) ? token : null;
+    }
+
+    private getUserTokenUnsafe(session: builder.Session): linkedin.UserToken {
         return (session.userData.linkedIn && session.userData.linkedIn.userToken);
     }
 

@@ -42,6 +42,10 @@ export interface UserToken {
     token: string;
     // Approximate expiration time of the access token, expressed as a number of milliseconds from midnight, January 1, 1970 Universal Coordinated Time (UTC)
     expirationTime: number;
+    // Verification code
+    magicNumber?: string;
+    // Has code been verified?
+    magicNumberVerified?: boolean;
 }
 
 export type ProfileField = "id" |
@@ -54,7 +58,7 @@ export type ProfileField = "id" |
 const apiBaseUrl = "https://api.linkedin.com/v1";
 const authorizationUrl = "https://www.linkedin.com/oauth/v2/authorization";
 const accessTokenUrl = "https://www.linkedin.com/oauth/v2/accessToken";
-const callbackPath = "/auth/linkedin/callback";
+const callbackPath = "/auth/linkedIn/callback";
 
 export class LinkedInApi {
 
