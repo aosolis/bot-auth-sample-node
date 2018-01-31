@@ -25,7 +25,8 @@ import * as builder from "botbuilder";
 import * as config from "config";
 import * as constants from "../constants";
 import * as storage from "../storage";
-import { UserToken, LinkedInApi } from "../providers";
+import * as utils from "../utils";
+import { LinkedInApi } from "../providers";
 
 // Dialog that handles dialogs for LinkedIn provider
 export class LinkedInDialog extends builder.IntentDialog
@@ -112,12 +113,12 @@ export class LinkedInDialog extends builder.IntentDialog
         let messageAsAny = session.message as any;
         let magicNumber = messageAsAny.originalInvoke.value.state;
 
-        let tokenUnsafe = this.getUserTokenUnsafe(session);
+        let tokenUnsafe = utils.getUserTokenUnsafe(session, constants.IdentityProviders.linkedIn);
         if (!tokenUnsafe.magicNumberVerified) {
             if ((tokenUnsafe.magicNumber === magicNumber) &&
                 (tokenUnsafe.magicNumberExpirationTime > Date.now())) {
                 tokenUnsafe.magicNumberVerified = true;
-                this.setUserToken(session, tokenUnsafe);
+                utils.setUserToken(session, constants.IdentityProviders.linkedIn, tokenUnsafe);
             } else {
                 console.warn("Magic number does not match.");
                 delete tokenUnsafe.magicNumber;
@@ -128,7 +129,7 @@ export class LinkedInDialog extends builder.IntentDialog
             console.warn("Received unexpected login callback");
         }
 
-        if (this.getUserToken(session)) {
+        if (utils.getUserToken(session, constants.IdentityProviders.linkedIn)) {
             await this.showUserProfile(session);
         } else {
             session.send("Sorry, there was an error signing in to LinkedIn. Please try again.");
@@ -137,7 +138,7 @@ export class LinkedInDialog extends builder.IntentDialog
 
     // Show user profile
     private async showUserProfile(session: builder.Session): Promise<void> {
-        let accessToken = this.getUserToken(session);
+        let accessToken = utils.getUserToken(session, constants.IdentityProviders.linkedIn);
         if (accessToken) {
             let profile = await this.linkedInApi.getProfileAsync(accessToken.token, [ "formatted-name", "headline", "picture-url", "public-profile-url", "location", "num-connections", "num-connections-capped" ]);
             let profileCard = new builder.ThumbnailCard()
@@ -162,10 +163,10 @@ export class LinkedInDialog extends builder.IntentDialog
 
     // Handle user logout request
     private async handleLogout(session: builder.Session): Promise<void> {
-        if (!this.getUserToken(session)) {
+        if (!utils.getUserToken(session, constants.IdentityProviders.linkedIn)) {
             session.send("You're already signed out of LinkedIn.");
         } else {
-            this.setUserToken(session, null);
+            utils.setUserToken(session, constants.IdentityProviders.linkedIn, null);
             session.send("You're now signed out of LinkedIn.");
         }
 
@@ -174,7 +175,7 @@ export class LinkedInDialog extends builder.IntentDialog
 
     // Handle user login request
     private async handleLogin(session: builder.Session): Promise<void> {
-        if (this.getUserToken(session)) {
+        if (utils.getUserToken(session, constants.IdentityProviders.linkedIn)) {
             session.send("You're already signed in to LinkedIn.");
             await this.promptForAction(session);
         } else {
@@ -197,21 +198,5 @@ export class LinkedInDialog extends builder.IntentDialog
                     ]));
             session.send(msg);
         }
-    }
-
-    private getUserToken(session: builder.Session): UserToken {
-        let token = this.getUserTokenUnsafe(session);
-        return (token && token.magicNumberVerified) ? token : null;
-    }
-
-    private getUserTokenUnsafe(session: builder.Session): UserToken {
-        return (session.userData.linkedIn && session.userData.linkedIn.userToken);
-    }
-
-    private setUserToken(session: builder.Session, token: UserToken): void {
-        let data = session.userData.linkedIn || {};
-        data.userToken = token;
-        session.userData.linkedIn = data;
-        session.save().sendBatch();
     }
 }
