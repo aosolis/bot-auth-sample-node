@@ -88,6 +88,7 @@ export class AuthBot extends builder.UniversalBot {
                 let userToken = await provider.getAccessTokenAsync(authCode);
                 userToken.magicNumberVerified = false;
                 userToken.magicNumber = await this.generateMagicNumber();
+                userToken.magicNumberExpirationTime = Date.now() + (10 * 60 * 1000);    // expires after 10 minutes
 
                 // TODO: Extract to helper
                 let providerData = session.userData[providerName] || {};

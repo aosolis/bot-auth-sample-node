@@ -113,12 +113,19 @@ export class LinkedInDialog extends builder.IntentDialog
         let magicNumber = messageAsAny.originalInvoke.value.state;
 
         let tokenUnsafe = this.getUserTokenUnsafe(session);
-        if (!tokenUnsafe.magicNumberVerified &&
-            (tokenUnsafe.magicNumber === magicNumber)) {
-            tokenUnsafe.magicNumberVerified = true;
-            this.setUserToken(session, tokenUnsafe);
+        if (!tokenUnsafe.magicNumberVerified) {
+            if ((tokenUnsafe.magicNumber === magicNumber) &&
+                (tokenUnsafe.magicNumberExpirationTime > Date.now())) {
+                tokenUnsafe.magicNumberVerified = true;
+                this.setUserToken(session, tokenUnsafe);
+            } else {
+                console.warn("Magic number does not match.");
+                delete tokenUnsafe.magicNumber;
+                delete tokenUnsafe.magicNumberVerified;
+                delete tokenUnsafe.magicNumberExpirationTime;
+            }
         } else {
-            console.warn("Magic number does not match.");
+            console.warn("Received unexpected login callback");
         }
 
         if (this.getUserToken(session)) {

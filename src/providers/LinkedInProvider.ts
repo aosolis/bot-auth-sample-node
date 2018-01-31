@@ -46,6 +46,8 @@ export interface UserToken {
     magicNumber?: string;
     // Has code been verified?
     magicNumberVerified?: boolean;
+    // Expiration time of magic number, expressed as a number of milliseconds from midnight, January 1, 1970 Universal Coordinated Time (UTC)
+    magicNumberExpirationTime?: number;
 }
 
 export type ProfileField = "id" |
