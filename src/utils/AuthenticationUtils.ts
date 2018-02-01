@@ -25,11 +25,14 @@ import * as builder from "botbuilder";
 import { UserToken } from "../providers";
 const randomNumber = require("random-number-csprng");
 
-// How many digits the magic number should be
-const magicNumberLength = 6;
+// How many digits the verification code should be
+const verificationCodeLength = 6;
 
-// How long the magic number is valid
-const magicNumberValidityInMilliseconds = 10 * 60 * 1000;       // 10 minutes
+// How long the verification code is valid
+const verificationCodeValidityInMilliseconds = 10 * 60 * 1000;       // 10 minutes
+
+// Regexp to look for verification code in message
+export const verificationCodeRegExp = /\b\d{6}\b/;
 
 // Gets the OAuth state for the given provider
 export function getOAuthStateKey(session: builder.Session, providerName: string): string {
@@ -55,13 +58,13 @@ export function ensureProviderData(session: builder.Session, providerName: strin
 // Gets the validated user token for the given provider
 export function getUserToken(session: builder.Session, providerName: string): UserToken {
     let token = getUserTokenUnsafe(session, providerName);
-    return (token && token.magicNumberVerified) ? token : null;
+    return (token && token.verificationCodeValidated) ? token : null;
 }
 
 // Checks if the user has a token that is pending verification
 export function isUserTokenPendingVerification(session: builder.Session, providerName: string): boolean {
     let token = getUserTokenUnsafe(session, providerName);
-    return !!(token && !token.magicNumberVerified && token.magicNumber);
+    return !!(token && !token.verificationCodeValidated && token.verificationCode);
 }
 
 // Sets the user token for the given provider
@@ -72,24 +75,24 @@ export function setUserToken(session: builder.Session, providerName: string, tok
     session.save().sendBatch();
 }
 
-// Prepares a token for verification. The token is marked as unverified, and a new magic number is generated.
+// Prepares a token for verification. The token is marked as unverified, and a new verification code is generated.
 export async function prepareTokenForVerification(userToken: UserToken): Promise<void> {
-    userToken.magicNumberVerified = false;
-    userToken.magicNumber = await generateMagicNumber();
-    userToken.magicNumberExpirationTime = Date.now() + magicNumberValidityInMilliseconds;
+    userToken.verificationCodeValidated = false;
+    userToken.verificationCode = await generateVerificationCode();
+    userToken.verificationCodeExpirationTime = Date.now() + verificationCodeValidityInMilliseconds;
 }
 
-// Validates the received magic number against what is expected
+// Validates the received verification code against what is expected
 // If they match, the token is marked as validated and can be used by the bot. Otherwise, the token is removed.
-export function validateMagicNumber(session: builder.Session, providerName: string, magicNumber: string): void {
+export function validateVerificationCode(session: builder.Session, providerName: string, verificationCode: string): void {
     let tokenUnsafe = getUserTokenUnsafe(session, providerName);
-    if (!tokenUnsafe.magicNumberVerified) {
-        if (magicNumber &&
-            (tokenUnsafe.magicNumber === magicNumber) &&
-            (tokenUnsafe.magicNumberExpirationTime > Date.now())) {
-            tokenUnsafe.magicNumberVerified = true;
+    if (!tokenUnsafe.verificationCodeValidated) {
+        if (verificationCode &&
+            (tokenUnsafe.verificationCode === verificationCode) &&
+            (tokenUnsafe.verificationCodeExpirationTime > Date.now())) {
+            tokenUnsafe.verificationCodeValidated = true;
         } else {
-            console.warn("Magic number does not match.");
+            console.warn("Verification code does not match.");
             setUserToken(session, providerName, null);
         }
 
@@ -100,11 +103,11 @@ export function validateMagicNumber(session: builder.Session, providerName: stri
     }
 }
 
-// Generate a magic number that the user has to enter to verify that the person that
+// Generate a verification code that the user has to enter to verify that the person that
 // went through the authorization flow is the same one as the user in the chat.
-async function generateMagicNumber(): Promise<string> {
-    let magicNumber = await randomNumber(0, Math.pow(10, magicNumberLength) - 1);
-    return ("0".repeat(magicNumberLength) + magicNumber).substr(-magicNumberLength);
+async function generateVerificationCode(): Promise<string> {
+    let verificationCode = await randomNumber(0, Math.pow(10, verificationCodeLength) - 1);
+    return ("0".repeat(verificationCodeLength) + verificationCode).substr(-verificationCodeLength);
 }
 
 // Gets the user token for the given provider, even if it has not yet been validated

@@ -33,18 +33,18 @@ export interface AuthorizationUrl {
     state: string;
 }
 
-// Access token
+// User token
 export interface UserToken {
     // Access token
     token: string;
     // Approximate expiration time of the access token, expressed as a number of milliseconds from midnight, January 1, 1970 Universal Coordinated Time (UTC)
     expirationTime: number;
     // Verification code
-    magicNumber?: string;
-    // Has code been verified?
-    magicNumberVerified?: boolean;
-    // Expiration time of magic number, expressed as a number of milliseconds from midnight, January 1, 1970 Universal Coordinated Time (UTC)
-    magicNumberExpirationTime?: number;
+    verificationCode?: string;
+    // Has the verification code been validated?
+    verificationCodeValidated?: boolean;
+    // Expiration time of verification code, expressed as a number of milliseconds from midnight, January 1, 1970 Universal Coordinated Time (UTC)
+    verificationCodeExpirationTime?: number;
 }
 
 // Generic OAuth2 provider interface

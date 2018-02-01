@@ -27,8 +27,6 @@ import * as storage from "../storage";
 import * as utils from "../utils";
 import { IOAuth2Provider, UserToken } from "../providers";
 
-const magicNumberRegExp = /\b\d{6}\b/;
-
 // Base identity dialog
 export abstract class BaseIdentityDialog extends builder.IntentDialog
 {
@@ -119,10 +117,10 @@ export abstract class BaseIdentityDialog extends builder.IntentDialog
                 }
             }
         } else {
-            // See if we are waiting for a magic number and got one
+            // See if we are waiting for a verification code and got one
             if (utils.isUserTokenPendingVerification(session, this.providerName)) {
-                let match = magicNumberRegExp.exec(session.message.text);
-                utils.validateMagicNumber(session, this.providerName, match && match[0]);
+                let match = utils.verificationCodeRegExp.exec(session.message.text);
+                utils.validateVerificationCode(session, this.providerName, match && match[0]);
 
                 // End of auth flow: if the token is marked as validated, then the user is logged in
 
@@ -142,9 +140,9 @@ export abstract class BaseIdentityDialog extends builder.IntentDialog
     // Handle user login callback
     private async handleLoginCallback(session: builder.Session): Promise<void> {
         let messageAsAny = session.message as any;
-        let magicNumber = messageAsAny.originalInvoke.value.state;
+        let verificationCode = messageAsAny.originalInvoke.value.state;
 
-        utils.validateMagicNumber(session, this.providerName, magicNumber);
+        utils.validateVerificationCode(session, this.providerName, verificationCode);
 
         // End of auth flow: if the token is marked as validated, then the user is logged in
 

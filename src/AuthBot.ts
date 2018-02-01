@@ -83,7 +83,7 @@ export class AuthBot extends builder.UniversalBot {
         const provider = this.botSettings[providerName] as IOAuth2Provider;
         const state = req.query.state;
         const authCode = req.query.code;
-        let magicNumber = "";
+        let verificationCode = "";
 
         // Load the session from the conversation information, which was stored in the auth state store.
         // The key is the OAuth state (a randomly-generated GUID).
@@ -112,14 +112,14 @@ export class AuthBot extends builder.UniversalBot {
             try {
                 // Redeem the authorization code for an access token, and store it provisionally
                 // The bot will refuse to use the token until we validate that the user in the chat
-                // is the same as the user who went through the authorization flow, using a magic number
+                // is the same as the user who went through the authorization flow, using a verification code
                 // that needs to be presented by the user in the chat.
 
                 let userToken = await provider.getAccessTokenAsync(authCode);
                 await utils.prepareTokenForVerification(userToken);
                 utils.setUserToken(session, providerName, userToken);
 
-                magicNumber = userToken.magicNumber;
+                verificationCode = userToken.verificationCode;
             } catch (e) {
                 winston.error("Failed to redeem code for an access token", e);
             }
@@ -128,21 +128,22 @@ export class AuthBot extends builder.UniversalBot {
         }
 
         // Render the page shown to the user
-        if (magicNumber) {
-            // If we have a magic number, we were able to redeem the code successfully. Render a page
-            // that calls notifySuccess() with the magic number, or instructs the user to enter it in chat.
-            res.render("oauth-callback-magicnumber", {
-                magicNumber: magicNumber,
+        if (verificationCode) {
+            // If we have a verification code, we were able to redeem the code successfully. Render a page
+            // that calls notifySuccess() with the verification code, or instructs the user to enter it in chat.
+            res.render("oauth-callback-success", {
+                verificationCode: verificationCode,
+                providerName: providerName,
             });
 
-            // The auth flow resumes when we receive the magic number response, which can happen either:
+            // The auth flow resumes when we receive the verification code response, which can happen either:
             // 1) through notifySuccess(), which is handled in BaseIdentityDialog.handleLoginCallback()
             // 2) by user entering it in chat, which is handled in BaseIdentityDialog.onMessageReceived()
 
         } else {
             // Otherwise render an error page
             res.render("oauth-callback-error", {
-                magicNumber: magicNumber,
+                verificationCode: verificationCode,
                 providerName: providerName,
             });
         }
