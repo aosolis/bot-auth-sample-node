@@ -23,6 +23,27 @@
 
 import * as builder from "botbuilder";
 import { UserToken } from "../providers";
+const randomNumber = require("random-number-csprng");
+
+// How many digits the magic number should be
+const magicNumberLength = 6;
+
+// How long the magic number is valid
+const magicNumberValidityInMilliseconds = 10 * 60 * 1000;       // 10 minutes
+
+// Gets the OAuth state for the given provider
+export function getOAuthStateKey(session: builder.Session, providerName: string): string {
+    ensureProviderData(session, providerName);
+    return (session.userData[providerName].oauthState);
+}
+
+// Sets the OAuth state for the given provider
+export function setOAuthStateKey(session: builder.Session, providerName: string, state: string): void {
+    ensureProviderData(session, providerName);
+    let data = session.userData[providerName];
+    data.oauthState = state;
+    session.save().sendBatch();
+}
 
 // Ensure that data bag for the given provider exists
 export function ensureProviderData(session: builder.Session, providerName: string): void {
@@ -51,21 +72,15 @@ export function setUserToken(session: builder.Session, providerName: string, tok
     session.save().sendBatch();
 }
 
-// Gets the OAuth state for the given provider
-export function getOAuthStateKey(session: builder.Session, providerName: string): string {
-    ensureProviderData(session, providerName);
-    return (session.userData[providerName].oauthState);
-}
-
-// Sets the OAuth state for the given provider
-export function setOAuthStateKey(session: builder.Session, providerName: string, state: string): void {
-    ensureProviderData(session, providerName);
-    let data = session.userData[providerName];
-    data.oauthState = state;
-    session.save().sendBatch();
+// Prepares a token for verification. The token is marked as unverified, and a new magic number is generated.
+export async function prepareTokenForVerification(userToken: UserToken): Promise<void> {
+    userToken.magicNumberVerified = false;
+    userToken.magicNumber = await generateMagicNumber();
+    userToken.magicNumberExpirationTime = Date.now() + magicNumberValidityInMilliseconds;
 }
 
 // Validates the received magic number against what is expected
+// If they match, the token is marked as validated and can be used by the bot. Otherwise, the token is removed.
 export function validateMagicNumber(session: builder.Session, providerName: string, magicNumber: string): void {
     let tokenUnsafe = getUserTokenUnsafe(session, providerName);
     if (!tokenUnsafe.magicNumberVerified) {
@@ -74,9 +89,7 @@ export function validateMagicNumber(session: builder.Session, providerName: stri
             tokenUnsafe.magicNumberVerified = true;
         } else {
             console.warn("Magic number does not match.");
-            delete tokenUnsafe.magicNumber;
-            delete tokenUnsafe.magicNumberVerified;
-            delete tokenUnsafe.magicNumberExpirationTime;
+            setUserToken(session, providerName, null);
         }
 
         // Save the token information back to userData
@@ -84,4 +97,11 @@ export function validateMagicNumber(session: builder.Session, providerName: stri
     } else {
         console.warn("Received unexpected login callback.");
     }
+}
+
+// Generate a magic number that the user has to enter to verify that the person that
+// went through the authorization flow is the same one as the user in the chat.
+async function generateMagicNumber(): Promise<string> {
+    let magicNumber = await randomNumber(0, Math.pow(10, magicNumberLength) - 1);
+    return ("0".repeat(magicNumberLength) + magicNumber).substr(-magicNumberLength);
 }

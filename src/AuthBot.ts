@@ -29,10 +29,6 @@ import * as utils from "./utils";
 import { Request, Response } from "express";
 import { RootDialog } from "./dialogs/RootDialog";
 import { IOAuth2Provider } from "./providers";
-const randomNumber = require("random-number-csprng");
-
-// How long the magic number is valid
-const magicNumberValidityInMilliseconds = 10 * 60 * 1000;       // 10 minutes
 
 // =========================================================
 // Auth Bot
@@ -82,12 +78,15 @@ export class AuthBot extends builder.UniversalBot {
     }
 
     // Handle OAuth callbacks
+    // The provider name is in the route, which is defined as "/auth/:provider/callback"
     public async handleOAuthCallback(req: Request, res: Response, providerName: string): Promise<void> {
         const provider = this.botSettings[providerName] as IOAuth2Provider;
         const state = req.query.state;
         const authCode = req.query.code;
         let magicNumber = "";
 
+        // Load the session from the conversation information, which was stored in the auth state store.
+        // The key is the OAuth state (a randomly-generated GUID).
         let session: builder.Session;
         let address: builder.IAddress;
         try {
@@ -111,10 +110,13 @@ export class AuthBot extends builder.UniversalBot {
             (utils.getOAuthStateKey(session, providerName) === state) &&        // OAuth state matches what we expect
             authCode) {                                                         // User granted authorization
             try {
+                // Redeem the authorization code for an access token, and store it provisionally
+                // The bot will refuse to use the token until we validate that the user in the chat
+                // is the same as the user who went through the authorization flow, using a magic number
+                // that needs to be presented by the user in the chat.
+
                 let userToken = await provider.getAccessTokenAsync(authCode);
-                userToken.magicNumberVerified = false;
-                userToken.magicNumber = await this.generateMagicNumber();
-                userToken.magicNumberExpirationTime = Date.now() + magicNumberValidityInMilliseconds;
+                utils.prepareTokenForVerification(userToken);
                 utils.setUserToken(session, providerName, userToken);
 
                 magicNumber = userToken.magicNumber;
@@ -125,12 +127,24 @@ export class AuthBot extends builder.UniversalBot {
             winston.warn("State does not match expected state parameter, or user denied authorization");
         }
 
+        // Render the page shown to the user
         if (magicNumber) {
+            // If we have a magic number, we were able to redeem the code successfully. Render a page
+            // that calls notifySuccess() with the magic number, or instructs the user to enter it in chat.
             res.render("oauth-callback-magicnumber", {
                 magicNumber: magicNumber,
             });
+
+            // The auth flow resumes when we receive the magic number response, which can happen either:
+            // 1) through notifySuccess(), which is handled in BaseIdentityDialog.handleLoginCallback()
+            // 2) by user entering it in chat, which is handled in BaseIdentityDialog.onMessageReceived()
+
         } else {
-            res.render("oauth-callback-error");
+            // Otherwise render an error page
+            res.render("oauth-callback-error", {
+                magicNumber: magicNumber,
+                providerName: providerName,
+            });
         }
     }
 
@@ -154,13 +168,5 @@ export class AuthBot extends builder.UniversalBot {
             });
         }
         cb(null, "");
-    }
-
-    // Generate a magic number that the user has to enter to verify that the person that
-    // went through the authorization flow is the same one as the user in the chat.
-    private async generateMagicNumber(): Promise<string> {
-        const magicNumberLength = 6;
-        let magicNumber = await randomNumber(0, Math.pow(10, magicNumberLength) - 1);
-        return ("0".repeat(magicNumberLength) + magicNumber).substr(-magicNumberLength);
     }
 }

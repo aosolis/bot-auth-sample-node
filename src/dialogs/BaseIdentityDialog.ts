@@ -67,7 +67,7 @@ export abstract class BaseIdentityDialog extends builder.IntentDialog
     protected async promptForAction(session: builder.Session): Promise<void> {
         let msg = new builder.Message(session)
             .addAttachment(new builder.ThumbnailCard(session)
-                .title("AzureAD (v1)")
+                .title(this.providerDisplayName)
                 .buttons([
                     builder.CardAction.messageBack(session, null, "Sign in")
                         .text("SignIn")
@@ -130,6 +130,8 @@ export abstract class BaseIdentityDialog extends builder.IntentDialog
 
         utils.validateMagicNumber(session, this.providerName, magicNumber);
 
+        // End of auth flow: if the token is marked as validated, then the user is logged in
+
         if (utils.getUserToken(session, this.providerName)) {
             await this.showUserProfile(session);
         } else {
@@ -155,26 +157,30 @@ export abstract class BaseIdentityDialog extends builder.IntentDialog
             session.send(`You're already signed in to ${this.providerDisplayName}.`);
             await this.promptForAction(session);
         } else {
-            // Build auth url for AzureADv1
+            // Build an authorization url for the identity provider
             let authInfo = this.authProvider.getAuthorizationUrl();
 
-            // Set up the OAuth state under the generated auth state key
+            // Using the randomly-generated OAuth state as a key, store the address of the chat user.
+            // This prevents someone with the signin url from tampering with the chat user's address.
             await this.authState.setAsync(authInfo.state, JSON.stringify(session.message.address));
             utils.setOAuthStateKey(session, this.providerName, authInfo.state);
-            session.save().sendBatch();
+
+            // Build the sign-in url
+            let signinUrl = config.get("app.baseUri") + `/html/auth-start.html?authorizationUrl=${encodeURIComponent(authInfo.url)}`;
 
             // Send card with signin action
-            let authUrl = config.get("app.baseUri") + `/html/auth-start.html?authorizationUrl=${encodeURIComponent(authInfo.url)}`;
             let msg = new builder.Message(session)
                 .addAttachment(new builder.HeroCard(session)
                     .text(`Click below to sign in to ${this.providerDisplayName}`)
                     .buttons([
                         new builder.CardAction(session)
                             .type("signin")
-                            .value(authUrl)
+                            .value(signinUrl)
                             .title("Sign in"),
                     ]));
             session.send(msg);
+
+            // The auth flow resumes when we handle the identity provider's OAuth callback in AuthBot.handleOAuthCallback()
         }
     }
 }
