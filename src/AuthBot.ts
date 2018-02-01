@@ -116,7 +116,7 @@ export class AuthBot extends builder.UniversalBot {
                 // that needs to be presented by the user in the chat.
 
                 let userToken = await provider.getAccessTokenAsync(authCode);
-                utils.prepareTokenForVerification(userToken);
+                await utils.prepareTokenForVerification(userToken);
                 utils.setUserToken(session, providerName, userToken);
 
                 magicNumber = userToken.magicNumber;

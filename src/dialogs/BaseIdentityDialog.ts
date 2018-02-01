@@ -27,6 +27,8 @@ import * as storage from "../storage";
 import * as utils from "../utils";
 import { IOAuth2Provider, UserToken } from "../providers";
 
+const magicNumberRegExp = /\b\d{6}\b/;
+
 // Base identity dialog
 export abstract class BaseIdentityDialog extends builder.IntentDialog
 {
@@ -117,9 +119,23 @@ export abstract class BaseIdentityDialog extends builder.IntentDialog
                 }
             }
         } else {
-            // Unrecognized input
-            session.send("I didn't understand. Please select an option below.");
-            this.promptForAction(session);
+            // See if we are waiting for a magic number and got one
+            if (utils.isUserTokenPendingVerification(session, this.providerName)) {
+                let match = magicNumberRegExp.exec(session.message.text);
+                utils.validateMagicNumber(session, this.providerName, match && match[0]);
+
+                // End of auth flow: if the token is marked as validated, then the user is logged in
+
+                if (utils.getUserToken(session, this.providerName)) {
+                    await this.showUserProfile(session);
+                } else {
+                    session.send(`Sorry, there was an error signing in to ${this.providerDisplayName}. Please try again.`);
+                }
+            } else {
+                // Unrecognized input
+                session.send("I didn't understand. Please select an option below.");
+                this.promptForAction(session);
+            }
         }
     }
 

@@ -58,10 +58,10 @@ export function getUserToken(session: builder.Session, providerName: string): Us
     return (token && token.magicNumberVerified) ? token : null;
 }
 
-// Gets the user token for the given provider, even if it has not yet been validated
-export function getUserTokenUnsafe(session: builder.Session, providerName: string): UserToken {
-    ensureProviderData(session, providerName);
-    return (session.userData[providerName].userToken);
+// Checks if the user has a token that is pending verification
+export function isUserTokenPendingVerification(session: builder.Session, providerName: string): boolean {
+    let token = getUserTokenUnsafe(session, providerName);
+    return !!(token && !token.magicNumberVerified && token.magicNumber);
 }
 
 // Sets the user token for the given provider
@@ -84,7 +84,8 @@ export async function prepareTokenForVerification(userToken: UserToken): Promise
 export function validateMagicNumber(session: builder.Session, providerName: string, magicNumber: string): void {
     let tokenUnsafe = getUserTokenUnsafe(session, providerName);
     if (!tokenUnsafe.magicNumberVerified) {
-        if ((tokenUnsafe.magicNumber === magicNumber) &&
+        if (magicNumber &&
+            (tokenUnsafe.magicNumber === magicNumber) &&
             (tokenUnsafe.magicNumberExpirationTime > Date.now())) {
             tokenUnsafe.magicNumberVerified = true;
         } else {
@@ -104,4 +105,10 @@ export function validateMagicNumber(session: builder.Session, providerName: stri
 async function generateMagicNumber(): Promise<string> {
     let magicNumber = await randomNumber(0, Math.pow(10, magicNumberLength) - 1);
     return ("0".repeat(magicNumberLength) + magicNumber).substr(-magicNumberLength);
+}
+
+// Gets the user token for the given provider, even if it has not yet been validated
+function getUserTokenUnsafe(session: builder.Session, providerName: string): UserToken {
+    ensureProviderData(session, providerName);
+    return (session.userData[providerName].userToken);
 }
