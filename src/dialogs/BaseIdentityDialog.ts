@@ -119,8 +119,8 @@ export abstract class BaseIdentityDialog extends builder.IntentDialog
         } else {
             // See if we are waiting for a verification code and got one
             if (utils.isUserTokenPendingVerification(session, this.providerName)) {
-                let match = utils.verificationCodeRegExp.exec(session.message.text);
-                utils.validateVerificationCode(session, this.providerName, match && match[0]);
+                let verificationCode = utils.findVerificationCode(session.message.text);
+                utils.validateVerificationCode(session, this.providerName, verificationCode);
 
                 // End of auth flow: if the token is marked as validated, then the user is logged in
 

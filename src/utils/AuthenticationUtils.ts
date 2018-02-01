@@ -32,7 +32,7 @@ const verificationCodeLength = 6;
 const verificationCodeValidityInMilliseconds = 10 * 60 * 1000;       // 10 minutes
 
 // Regexp to look for verification code in message
-export const verificationCodeRegExp = /\b\d{6}\b/;
+const verificationCodeRegExp = /\b\d{6}\b/;
 
 // Gets the OAuth state for the given provider
 export function getOAuthStateKey(session: builder.Session, providerName: string): string {
@@ -80,6 +80,12 @@ export async function prepareTokenForVerification(userToken: UserToken): Promise
     userToken.verificationCodeValidated = false;
     userToken.verificationCode = await generateVerificationCode();
     userToken.verificationCodeExpirationTime = Date.now() + verificationCodeValidityInMilliseconds;
+}
+
+// Finds a verification code in the text string
+export function findVerificationCode(text: string): string {
+    let match = verificationCodeRegExp.exec(text);
+    return match && match[0];
 }
 
 // Validates the received verification code against what is expected
