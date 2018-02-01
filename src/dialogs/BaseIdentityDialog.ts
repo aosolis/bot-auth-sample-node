@@ -71,16 +71,16 @@ export abstract class BaseIdentityDialog extends builder.IntentDialog
             .addAttachment(new builder.ThumbnailCard(session)
                 .title(this.providerDisplayName)
                 .buttons([
-                    builder.CardAction.messageBack(session, null, "Sign in")
+                    builder.CardAction.messageBack(session, "{}", "Sign in")
                         .text("SignIn")
                         .displayText("Sign in"),
-                    builder.CardAction.messageBack(session, null, "Show profile")
+                    builder.CardAction.messageBack(session, "{}", "Show profile")
                         .text("ShowProfile")
                         .displayText("Show profile"),
-                    builder.CardAction.messageBack(session, null, "Sign out")
+                    builder.CardAction.messageBack(session, "{}", "Sign out")
                         .text("SignOut")
                         .displayText("Sign out"),
-                    builder.CardAction.messageBack(session, null, "Back")
+                    builder.CardAction.messageBack(session, "{}", "Back")
                         .text("Back")
                         .displayText("Back"),
                 ]));
@@ -183,6 +183,9 @@ export abstract class BaseIdentityDialog extends builder.IntentDialog
 
             // Build the sign-in url
             let signinUrl = config.get("app.baseUri") + `/html/auth-start.html?authorizationUrl=${encodeURIComponent(authInfo.url)}`;
+            console.log(signinUrl);
+            let signinUrlWithFallback = signinUrl + `&fallbackUrl=${encodeURIComponent(signinUrl)}`;
+            console.log(signinUrlWithFallback);
 
             // Send card with signin action
             let msg = new builder.Message(session)
@@ -191,7 +194,7 @@ export abstract class BaseIdentityDialog extends builder.IntentDialog
                     .buttons([
                         new builder.CardAction(session)
                             .type("signin")
-                            .value(signinUrl)
+                            .value(signinUrlWithFallback)
                             .title("Sign in"),
                     ]));
             session.send(msg);

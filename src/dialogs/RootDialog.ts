@@ -76,7 +76,7 @@ export class RootDialog extends builder.IntentDialog
                 .title("Select an identity provider")
                 .buttons([
                     builder.CardAction.imBack(session, "LinkedIn", "LinkedIn"),
-                    builder.CardAction.messageBack(session, null, "AzureAD (v1)")
+                    builder.CardAction.messageBack(session, "{}", "AzureAD (v1)")
                         .displayText("AzureAD (v1)")
                         .text("AzureADv1"),
                 ]));
