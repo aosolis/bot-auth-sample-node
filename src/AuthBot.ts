@@ -133,7 +133,7 @@ export class AuthBot extends builder.UniversalBot {
             // that calls notifySuccess() with the verification code, or instructs the user to enter it in chat.
             res.render("oauth-callback-success", {
                 verificationCode: verificationCode,
-                providerName: providerName,
+                providerName: provider.displayName,
             });
 
             // The auth flow resumes when we receive the verification code response, which can happen either:
@@ -143,8 +143,7 @@ export class AuthBot extends builder.UniversalBot {
         } else {
             // Otherwise render an error page
             res.render("oauth-callback-error", {
-                verificationCode: verificationCode,
-                providerName: providerName,
+                providerName: provider.displayName,
             });
         }
     }

@@ -45,6 +45,10 @@ export class AzureADv1Provider implements IOAuth2Provider {
     {
     }
 
+    get displayName(): string {
+        return "Azure AD";
+    }
+
     // Return the url the user should navigate to to authenticate the app
     public getAuthorizationUrl(extraParams?: any): AuthorizationUrl {
         let params = {

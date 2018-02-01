@@ -52,6 +52,10 @@ export class LinkedInProvider implements IOAuth2Provider {
     {
     }
 
+    get displayName(): string {
+        return "LinkedIn";
+    }
+
     // Return the url the user should navigate to to authenticate the app
     public getAuthorizationUrl(extraParams?: any): AuthorizationUrl {
         let params = {

@@ -50,6 +50,9 @@ export interface UserToken {
 // Generic OAuth2 provider interface
 export interface IOAuth2Provider {
 
+    // Display name to use for the provider
+    readonly displayName: string;
+
     // Return the url the user should navigate to to authenticate the app
     getAuthorizationUrl(extraParams?: any): AuthorizationUrl;
 
