@@ -23,7 +23,7 @@
 
 import * as builder from "botbuilder";
 import * as constants from "../constants";
-import { LinkedInApi } from "../providers";
+import { LinkedInProvider } from "../providers";
 import { BaseIdentityDialog } from "./BaseIdentityDialog";
 
 // Dialog that handles dialogs for LinkedIn provider
@@ -35,7 +35,7 @@ export class LinkedInDialog extends BaseIdentityDialog
 
     // Show user profile
     protected async showUserProfile(session: builder.Session): Promise<void> {
-        let linkedInApi = this.authProvider as LinkedInApi;
+        let linkedInApi = this.authProvider as LinkedInProvider;
         let userToken = this.getUserToken(session);
 
         if (userToken) {

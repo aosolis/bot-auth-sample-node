@@ -43,7 +43,7 @@ const authorizationUrl = "https://www.linkedin.com/oauth/v2/authorization";
 const accessTokenUrl = "https://www.linkedin.com/oauth/v2/accessToken";
 const callbackPath = "/auth/linkedIn/callback";
 
-export class LinkedInApi implements IOAuth2Provider {
+export class LinkedInProvider implements IOAuth2Provider {
 
     constructor(
         private clientId: string,
