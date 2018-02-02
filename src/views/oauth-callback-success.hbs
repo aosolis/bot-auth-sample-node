@@ -32,9 +32,12 @@
     </head>
     <body class="theme-light">
         <div id="instructionText" style="display: none">
-            <p>You're almost there!</p>
-            <p>To finish authenticating with {{providerName}}, type <span class="verification-code">{{verificationCode}}</span> in the chat to get started.</p> 
-            <p>Then you can close this tab.</p>
+            <div class="instruction-text">
+                <p>You're almost there!</p>
+                <p>To finish linking your account with<br/> {{providerName}}, type</p>
+                <span class="verification-code">{{verificationCode}}</span>
+                <p>in the Microsoft Teams chat window.</p> 
+            </div>
         </div>
 
         <script src="https://statics.teams.microsoft.com/sdk/v1.2/js/MicrosoftTeams.min.js" integrity="sha384-OncOcMprEYFkUvhe15zi8VdCZIOcuNGnf4ilq2yTfDEjTwPF19V7pZrzxOq/iqt0" crossorigin="anonymous"></script>
