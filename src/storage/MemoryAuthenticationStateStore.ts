@@ -23,7 +23,8 @@
 
 import { IAuthenticationStateStore } from "./AuthenticationStateStore";
 
-/** Storage system for temporary authentication state. */
+// In-memory storage system for temporary authentication state.
+// NOTE: This is for demonstration purposes only. Do not use in production!
 export class MemoryAuthenticationStateStore implements IAuthenticationStateStore {
 
     // tslint:disable-next-line:typedef
@@ -31,6 +32,7 @@ export class MemoryAuthenticationStateStore implements IAuthenticationStateStore
 
     /** Writes data to storage. */
     public async setAsync(key: string, value: string, ttlInSeconds?: number): Promise<void> {
+        // This implementation ignores the TTL for simplicity
         this.data.set(key, value);
     }
 

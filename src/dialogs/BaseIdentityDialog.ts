@@ -27,15 +27,18 @@ import * as storage from "../storage";
 import * as utils from "../utils";
 import { IOAuth2Provider, UserToken } from "../providers";
 
+// Signin sessions must be completed within this validity period
+const signinSessionValidityInSeconds = 10 * 60;     // 10 minutes
+
 // Base identity dialog
 export abstract class BaseIdentityDialog extends builder.IntentDialog
 {
     protected authProvider: IOAuth2Provider;
+    private providerDisplayName: string;
     private authState: storage.IAuthenticationStateStore;
 
     constructor(
         protected providerName: string,
-        protected providerDisplayName: string,
         private dialogId: string) {
         super();
     }
@@ -45,6 +48,7 @@ export abstract class BaseIdentityDialog extends builder.IntentDialog
         bot.dialog(this.dialogId, this);
 
         this.authProvider = bot.get(this.providerName) as IOAuth2Provider;
+        this.providerDisplayName = this.authProvider.displayName;
         this.authState = bot.get("authState") as storage.IAuthenticationStateStore;
 
         this.onBegin((session, args, next) => { this.onDialogBegin(session, args, next); });
@@ -176,7 +180,8 @@ export abstract class BaseIdentityDialog extends builder.IntentDialog
 
             // Using the randomly-generated OAuth state as a key, store the address of the chat user.
             // This prevents someone with the signin url from tampering with the chat user's address.
-            await this.authState.setAsync(authInfo.state, JSON.stringify(session.message.address));
+            // Set the TTL on this state so that the signin session is automatically invalidated after some time.
+            await this.authState.setAsync(authInfo.state, JSON.stringify(session.message.address), signinSessionValidityInSeconds);
             utils.setOAuthStateKey(session, this.providerName, authInfo.state);
 
             // Build the sign-in url

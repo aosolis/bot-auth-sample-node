@@ -79,6 +79,9 @@ export class AuthBot extends builder.UniversalBot {
         try {
             let addressString = await this.authState.getAsync(state);
             if (addressString) {
+                // Delete the state key, so it can only be used once.
+                await this.authState.deleteAsync(state);
+
                 address = JSON.parse(addressString) as builder.IAddress;
                 session = await utils.loadSessionAsync(this, {
                     type: "invoke",
