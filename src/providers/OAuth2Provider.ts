@@ -36,7 +36,7 @@ export interface AuthorizationUrl {
 // User token
 export interface UserToken {
     // Access token
-    token: string;
+    accessToken: string;
     // Approximate expiration time of the access token, expressed as a number of milliseconds from midnight, January 1, 1970 Universal Coordinated Time (UTC)
     expirationTime: number;
     // Verification code

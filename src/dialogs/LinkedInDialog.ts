@@ -39,7 +39,7 @@ export class LinkedInDialog extends BaseIdentityDialog
         let userToken = this.getUserToken(session);
 
         if (userToken) {
-            let profile = await linkedInApi.getProfileAsync(userToken.token, [ "formatted-name", "headline", "picture-url", "public-profile-url", "location", "num-connections", "num-connections-capped" ]);
+            let profile = await linkedInApi.getProfileAsync(userToken.accessToken, [ "formatted-name", "headline", "picture-url", "public-profile-url", "location", "num-connections", "num-connections-capped" ]);
             let profileCard = new builder.ThumbnailCard()
                 .title(profile.formattedName)
                 .subtitle(profile.headline)

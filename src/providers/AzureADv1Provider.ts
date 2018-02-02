@@ -85,7 +85,7 @@ export class AzureADv1Provider implements IOAuth2Provider {
                     reject(err);
                 } else {
                     resolve({
-                        token: body.access_token,
+                        accessToken: body.access_token,
                         expirationTime: body.expires_on * 1000,
                     });
                 }

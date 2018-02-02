@@ -39,7 +39,7 @@ export class AzureADv1Dialog extends BaseIdentityDialog
         let userToken = this.getUserToken(session);
 
         if (userToken) {
-            let profile = await azureADApi.getProfileAsync(userToken.token);
+            let profile = await azureADApi.getProfileAsync(userToken.accessToken);
             let profileCard = new builder.ThumbnailCard()
                 .title(profile.displayName)
                 .subtitle(profile.mail)

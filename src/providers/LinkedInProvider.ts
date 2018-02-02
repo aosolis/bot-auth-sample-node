@@ -90,7 +90,7 @@ export class LinkedInProvider implements IOAuth2Provider {
                     reject(err);
                 } else {
                     resolve({
-                        token: body.access_token,
+                        accessToken: body.access_token,
                         expirationTime: Date.now() + (body.expires_in * 1000),
                     });
                 }
