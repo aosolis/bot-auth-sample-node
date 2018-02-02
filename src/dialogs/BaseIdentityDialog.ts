@@ -186,9 +186,13 @@ export abstract class BaseIdentityDialog extends builder.IntentDialog
 
             // Build the sign-in url
             let signinUrl = config.get("app.baseUri") + `/html/auth-start.html?authorizationUrl=${encodeURIComponent(authInfo.url)}`;
-            console.log(signinUrl);
+
+            // The fallbackUrl specifies the page to be opened on mobile, until they support automatically passing the
+            // verification code via notifySuccess(). If you want to support only this protocol, then you can give the
+            // URL of an error page that directs the user to sign in using the desktop app. The flow demonstrated here
+            // gracefully falls back to asking the user to enter the verification code manually, so we use the same
+            // signin URL as the fallback URL. 
             let signinUrlWithFallback = signinUrl + `&fallbackUrl=${encodeURIComponent(signinUrl)}`;
-            console.log(signinUrlWithFallback);
 
             // Send card with signin action
             let msg = new builder.Message(session)
