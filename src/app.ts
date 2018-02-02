@@ -21,7 +21,6 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-let appInsights = require("applicationinsights");
 let express = require("express");
 let exphbs  = require("express-handlebars");
 import { Request, Response } from "express";
@@ -35,19 +34,8 @@ import * as builder from "botbuilder";
 import * as msteams from "botbuilder-teams";
 import * as winston from "winston";
 import * as storage from "./storage";
-import * as utils from "./utils";
 import * as providers from "./providers";
 import { AuthBot } from "./AuthBot";
-
-// Configure instrumentation
-let instrumentationKey = config.get("app.instrumentationKey");
-if (instrumentationKey) {
-    appInsights.setup(instrumentationKey)
-        .setAutoDependencyCorrelation(true)
-        .start();
-    winston.add(utils.ApplicationInsightsTransport as any);
-    appInsights.client.addTelemetryProcessor(utils.stripQueryFromTelemetryUrls);
-}
 
 let app = express();
 

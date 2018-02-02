@@ -36,7 +36,6 @@ import { IOAuth2Provider } from "./providers";
 
 export class AuthBot extends builder.UniversalBot {
 
-    private loadSessionAsync: {(address: builder.IAddress): Promise<builder.Session>};
     private authState: storage.IAuthenticationStateStore;
 
     constructor(
@@ -49,18 +48,6 @@ export class AuthBot extends builder.UniversalBot {
         this.set("persistConversationData", true);
 
         this.authState = this.get("authState") as storage.IAuthenticationStateStore;
-
-        this.loadSessionAsync = (address) => {
-            return new Promise((resolve, reject) => {
-                this.loadSession(address, (err: any, session: builder.Session) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(session);
-                    }
-                });
-            });
-        };
 
         // Handle generic invokes
         let teamsConnector = this._connector as msteams.TeamsChatConnector;
@@ -150,7 +137,7 @@ export class AuthBot extends builder.UniversalBot {
 
     // Handle incoming invoke
     private async onInvoke(event: builder.IEvent, cb: (err: Error, body: any, status?: number) => void): Promise<void> {
-        let session = await this.loadSessionAsync(event.address);
+        let session = await utils.loadSessionAsync(this, event);
         if (session) {
             // Invokes don't participate in middleware
 

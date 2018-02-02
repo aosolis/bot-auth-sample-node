@@ -42,35 +42,9 @@ gulp.task('clean', function () {
 });
 
 /**
- * Generate constants from string tables.
- */
-gulp.task('locale:generate', function() {
-    gulp.src('./src/locale/en/index.json')
-    .pipe(jsonTransform(function(data, file) {
-        let result = 
-        '/* -------------------------------------------------------------------- */\n' + 
-        '/* DO NOT MODIFY, THIS FILE IS GENERATED from src\\locale\\en\\index.json. */\n' + 
-        '/* CHECK-IN THIS FILE SO WE CAN TRACK HISTORY.                          */\n' + 
-        '/* -------------------------------------------------------------------- */\n' + 
-        '\n' + 
-        '// tslint:disable-next-line:variable-name\n' + 
-        'export const Strings = {\n';
-        for (var p in data) {
-            if( data.hasOwnProperty(p) ) {
-                result += '   "' + p + '": "'+ p + '",\n';
-            }
-        }
-        result += '};\n';
-        return result;
-    }))
-    .pipe(rename('locale.ts'))
-    .pipe(gulp.dest('./src/locale'));
-});
-
-/**
  * Lint all TypeScript files.
  */
-gulp.task('ts:lint', ['locale:generate'], function () {
+gulp.task('ts:lint', [], function () {
     return gulp
         .src(filesToLint)
         .pipe(tslint({
@@ -84,7 +58,7 @@ gulp.task('ts:lint', ['locale:generate'], function () {
 /**
  * Compile TypeScript and include references to library.
  */
-gulp.task('ts', ['clean', 'locale:generate'], function() {
+gulp.task('ts', ['clean'], function() {
     return tsProject
         .src()
         .pipe(sourcemaps.init())
