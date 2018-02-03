@@ -62,35 +62,3 @@
         }
     ]
 }
-{
-    // Use IntelliSense to learn about possible Node.js debug attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Launch Program",
-            "program": "${workspaceRoot}\\build\\src\\app.js",
-            "cwd": "${workspaceRoot}\\build\\src",
-            "sourceMaps": true,
-            "outFiles": [ "${workspaceRoot}/build/src/**/*.js" ],
-            "env": {
-                "BASE_URI": "https://BASE_URI",
-                "MICROSOFT_APP_ID": "MICROSOFT_APP_ID",
-                "MICROSOFT_APP_PASSWORD": "MICROSOFT_APP_PASSWORD",
-                "LINKEDIN_CLIENT_ID": "LINKEDIN_CLIENT_ID",
-                "LINKEDIN_CLIENT_SECRET": "LINKEDIN_CLIENT_SECRET",
-                "NODE_DEBUG": "botbuilder"
-            }
-        },
-        {
-            "type": "node",
-            "request": "attach",
-            "name": "Attach to Process",
-            "port": 5858,
-            "outFiles": []
-        }
-    ]
-}

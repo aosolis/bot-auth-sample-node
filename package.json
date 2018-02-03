@@ -1,7 +1,7 @@
 {
-  "name": "auth-sample-node",
+  "name": "microsoft-teams-auth-sample-node",
   "version": "0.0.1",
-  "description": "Bot Auth Sample for Microsoft Teams",
+  "description": "Authentication Sample for Microsoft Teams",
   "author": {
     "name": "Adrian Solis"
   },
@@ -9,7 +9,9 @@
   "private": true,
   "main": "app.js",
   "scripts": {
-    "start": "cd build/src && node app.js"
+    "start": "cd ./build/src && node app.js",
+    "build": "gulp build",
+    "debug": "cd ./build/src && node --debug app.js"
   },
   "engines": {
     "node": "7.7.4"
