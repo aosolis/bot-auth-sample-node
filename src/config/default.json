@@ -4,16 +4,20 @@
         "instrumentationKey": ""
     },
     "bot": {
-        "appId": "247aa88a-c2a5-4aa4-9e01-449bd49a2306",
-        "appPassword": "<secret>"
+        "appId": "<app_id>",
+        "appPassword": "<app_password>"
     },
     "linkedIn": {
-        "clientId": "81gxxl96g7qyd4",
-        "clientSecret": "<secret>"
+        "clientId": "<client_id>",
+        "clientSecret": "<client_secret>"
     },
     "azureAD": {
-        "appId": "247aa88a-c2a5-4aa4-9e01-449bd49a2306",
-        "appPassword": "<secret>"
+        "appId": "<app_id>",
+        "appPassword": "<app_password>"
+    },
+    "google": {
+        "clientId": "<client_id>",
+        "clientSecret": "<client_secret>"
     },
     "storage": "memory",
     "features": {
