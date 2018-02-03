@@ -32,3 +32,23 @@ Registering a bot with the Microsoft Bot Framework automatically creates a corre
 2. In "Authorized Redirect URLs", add `https://<your_ngrok_url>/auth/linkedIn/callback`.
 3. Note your app's "Client ID" and "Client Secret".
 4. Set `LINKEDIN_CLIENT_ID` = `<your_client_id>`, and `LINKEDIN_CLIENT_SECRET` = `<your_client_secret>`.
+
+## Bot authentication flow
+
+![Bot auth sequence diagram](https://aosolis.github.io/bot-auth/bot_auth_sequence.png)
+
+1. The user sends a message to the bot.
+2. The bot determines if the user needs to sign in.
+    * In the example, the bot stores the access token in its user data store, and uses the presence of the (validated) token to determine if the user needs to log in.
+3. The bot constructs the URL to the auth start page, and sends a card to the user with a "signin" action. Like other Microsoft Teams app auth flows, the start page must be on a domain that's the `validDomains` list, and on the same domain as the OAuth redirect page.
+4. When the user clicks on the button, Teams opens a popup window and navigates it to the start page.
+5. The start page redirects the user to the identity provider's `authorize` endpoint.
+6. On the identity provider's page, the user signs in an grants access to the bot.
+7. The identity provider takes the user to the bot's OAuth redirect page, with an authorization code.
+8. Bot redeems the authorization code for an access token, and provisionally associates the token with the user that initiated the signin flow.
+    * In the example, the bot uses the OAuth `state` parameter to determine the user that started the signin process. `state` is a random GUID that is a key into a temporary auth state table, and it expires after 10 minutes.
+    * **IMPORTANT**: The provisional token is stored in the user data store, but it is marked as "pending validation". The user has to "complete the loop" by sending the verification code in Teams, to ensure that the user who authorized the bot with the identity provider is the same user who is chatting with the bot in Teams. Until then, the token should not be used.
+9. OAuth callback renders a page that calls `notifySuccess("<verification code>")`.
+10. Teams closes the popup and sends the string passed to `notifySuccess()` over to the bot via an invoke message with `name` = ` signin/verifyState`.
+11. Bot checks the incoming verification code against the code stored in the user's provisional token.
+12. If they match, bot marks the token as validated and ready for use. Otherwise, the auth flow fails, and it deletes the provisional token.
