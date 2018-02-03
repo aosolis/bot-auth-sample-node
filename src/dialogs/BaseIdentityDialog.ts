@@ -178,6 +178,12 @@ export abstract class BaseIdentityDialog extends builder.IntentDialog
             // Build an authorization url for the identity provider
             let authInfo = this.authProvider.getAuthorizationUrl();
 
+            // Delete any existing OAuth state for this user, so a user cannot fill up the temp auth state store.
+            let existingStateKey = utils.getOAuthStateKey(session, this.providerName);
+            if (existingStateKey) {
+                await this.authState.deleteAsync(existingStateKey);
+            }
+
             // Using the randomly-generated OAuth state as a key, store the address of the chat user.
             // This prevents someone with the signin url from tampering with the chat user's address.
             // Set the TTL on this state so that the signin session is automatically invalidated after some time.
