@@ -25,14 +25,6 @@
 // OAuth2 Provider
 // =========================================================
 
-// OAuth authorization url
-export interface AuthorizationUrl {
-    // Url where user can grant authorization
-    url: string;
-    // OAuth state parameter embedded in the url
-    state: string;
-}
-
 // User token
 export interface UserToken {
     // Access token
@@ -54,7 +46,7 @@ export interface IOAuth2Provider {
     readonly displayName: string;
 
     // Return the url the user should navigate to to authenticate the app
-    getAuthorizationUrl(extraParams?: any): AuthorizationUrl;
+    getAuthorizationUrl(state: string, extraParams?: any): string;
 
     // Redeem the authorization code for an access token
     getAccessTokenAsync(code: string): Promise<UserToken>;

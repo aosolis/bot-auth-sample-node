@@ -24,8 +24,7 @@
 import * as request from "request";
 import * as config from "config";
 import * as querystring from "querystring";
-let uuidv4 = require("uuid/v4");
-import { AuthorizationUrl, UserToken, IOAuth2Provider } from "./OAuth2Provider";
+import { UserToken, IOAuth2Provider } from "./OAuth2Provider";
 
 // =========================================================
 // AzureAD v1 API
@@ -50,22 +49,19 @@ export class AzureADv1Provider implements IOAuth2Provider {
     }
 
     // Return the url the user should navigate to to authenticate the app
-    public getAuthorizationUrl(extraParams?: any): AuthorizationUrl {
+    public getAuthorizationUrl(state: string, extraParams?: any): string {
         let params = {
             response_type: "code",
             response_mode: "query",
             client_id: this.clientId,
             redirect_uri: config.get("app.baseUri") + callbackPath,
             resource: "https://graph.microsoft.com",
-            state: uuidv4(),
+            state: state,
         } as any;
         if (extraParams) {
             params = { ...extraParams, ...params };
         }
-        return {
-            url: authorizationUrl + "?" + querystring.stringify(params),
-            state: params.state,
-        };
+        return authorizationUrl + "?" + querystring.stringify(params);
     }
 
     // Redeem the authorization code for an access token

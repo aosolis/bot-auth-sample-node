@@ -73,7 +73,6 @@ let connector = new msteams.TeamsChatConnector({
 });
 let botSettings = {
     storage: botStorage,
-    authState: new storage.MemoryAuthenticationStateStore(),
     linkedIn: new providers.LinkedInProvider(config.get("linkedIn.clientId"), config.get("linkedIn.clientSecret")),
     azureADv1: new providers.AzureADv1Provider(config.get("azureAD.appId"), config.get("azureAD.appPassword")),
 };

@@ -23,19 +23,15 @@
 
 import * as builder from "botbuilder";
 import * as config from "config";
-import * as storage from "../storage";
 import * as utils from "../utils";
 import { IOAuth2Provider, UserToken } from "../providers";
-
-// Signin sessions must be completed within this validity period
-const signinSessionValidityInSeconds = 10 * 60;     // 10 minutes
+let uuidv4 = require("uuid/v4");
 
 // Base identity dialog
 export abstract class BaseIdentityDialog extends builder.IntentDialog
 {
     protected authProvider: IOAuth2Provider;
     private providerDisplayName: string;
-    private authState: storage.IAuthenticationStateStore;
 
     constructor(
         protected providerName: string,
@@ -49,7 +45,6 @@ export abstract class BaseIdentityDialog extends builder.IntentDialog
 
         this.authProvider = bot.get(this.providerName) as IOAuth2Provider;
         this.providerDisplayName = this.authProvider.displayName;
-        this.authState = bot.get("authState") as storage.IAuthenticationStateStore;
 
         this.onBegin((session, args, next) => { this.onDialogBegin(session, args, next); });
         this.onDefault((session) => { this.onMessageReceived(session); });
@@ -175,23 +170,18 @@ export abstract class BaseIdentityDialog extends builder.IntentDialog
             session.send(`You're already signed in to ${this.providerDisplayName}.`);
             await this.promptForAction(session);
         } else {
-            // Build an authorization url for the identity provider
-            let authInfo = this.authProvider.getAuthorizationUrl();
+            // Create the OAuth state, including a random anti-forgery state token
+            let state = JSON.stringify({
+                securityToken: uuidv4(),
+                address: session.message.address,
+            });
+            utils.setOAuthState(session, this.providerName, state);
 
-            // Delete any existing OAuth state for this user, so a user cannot fill up the temp auth state store.
-            let existingStateKey = utils.getOAuthStateKey(session, this.providerName);
-            if (existingStateKey) {
-                await this.authState.deleteAsync(existingStateKey);
-            }
-
-            // Using the randomly-generated OAuth state as a key, store the address of the chat user.
-            // This prevents someone with the signin url from tampering with the chat user's address.
-            // Set the TTL on this state so that the signin session is automatically invalidated after some time.
-            await this.authState.setAsync(authInfo.state, JSON.stringify(session.message.address), signinSessionValidityInSeconds);
-            utils.setOAuthStateKey(session, this.providerName, authInfo.state);
+            // Create the authorization URL
+            let authUrl = this.authProvider.getAuthorizationUrl(state);
 
             // Build the sign-in url
-            let signinUrl = config.get("app.baseUri") + `/html/auth-start.html?authorizationUrl=${encodeURIComponent(authInfo.url)}`;
+            let signinUrl = config.get("app.baseUri") + `/html/auth-start.html?authorizationUrl=${encodeURIComponent(authUrl)}`;
 
             // The fallbackUrl specifies the page to be opened on mobile, until they support automatically passing the
             // verification code via notifySuccess(). If you want to support only this protocol, then you can give the

@@ -35,13 +35,13 @@ const verificationCodeValidityInMilliseconds = 10 * 60 * 1000;       // 10 minut
 const verificationCodeRegExp = /\b\d{6}\b/;
 
 // Gets the OAuth state for the given provider
-export function getOAuthStateKey(session: builder.Session, providerName: string): string {
+export function getOAuthState(session: builder.Session, providerName: string): string {
     ensureProviderData(session, providerName);
     return (session.userData[providerName].oauthState);
 }
 
 // Sets the OAuth state for the given provider
-export function setOAuthStateKey(session: builder.Session, providerName: string, state: string): void {
+export function setOAuthState(session: builder.Session, providerName: string, state: string): void {
     ensureProviderData(session, providerName);
     let data = session.userData[providerName];
     data.oauthState = state;

@@ -46,7 +46,7 @@ Registering a bot with the Microsoft Bot Framework automatically creates a corre
 6. On the identity provider's page, the user signs in an grants access to the bot.
 7. The identity provider takes the user to the bot's OAuth redirect page, with an authorization code.
 8. Bot redeems the authorization code for an access token, and provisionally associates the token with the user that initiated the signin flow.
-    * In the example, the bot uses the OAuth `state` parameter to determine the user that started the signin process. `state` is a random GUID that is a key into a temporary auth state table, and it expires after 10 minutes.
+    * In the example, the bot uses information in the OAuth `state` parameter to determine the user that started the signin process. Before proceeding, it checks the value against the expected `state` value, to detect forged requests.
     * **IMPORTANT**: The provisional token is stored in the user data store, but it is marked as "pending validation". The user has to "complete the loop" by sending the verification code in Teams, to ensure that the user who authorized the bot with the identity provider is the same user who is chatting with the bot in Teams. Until then, the token should not be used.
 9. OAuth callback renders a page that calls `notifySuccess("<verification code>")`.
 10. Teams closes the popup and sends the string passed to `notifySuccess()` over to the bot via an invoke message with `name` = ` signin/verifyState`.

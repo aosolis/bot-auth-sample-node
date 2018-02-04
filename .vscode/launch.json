@@ -50,7 +50,7 @@
             "program": "${workspaceRoot}\\build\\src\\app.js",
             "cwd": "${workspaceRoot}\\build\\src",
             "sourceMaps": true,
-            "outFiles": [],
+            "outFiles": [ "${workspaceRoot}/build/src/**/*.js" ],
             "env": {
                 "BASE_URI": "https://BASE_URI",
                 "MICROSOFT_APP_ID": "MICROSOFT_APP_ID",
