@@ -24,7 +24,6 @@
 import * as builder from "botbuilder";
 import * as msteams from "botbuilder-teams";
 import * as winston from "winston";
-import * as storage from "./storage";
 import * as utils from "./utils";
 import { Request, Response } from "express";
 import { RootDialog } from "./dialogs/RootDialog";
@@ -36,8 +35,6 @@ import { IOAuth2Provider } from "./providers";
 
 export class AuthBot extends builder.UniversalBot {
 
-    private authState: storage.IAuthenticationStateStore;
-
     constructor(
         public _connector: builder.IConnector,
         private botSettings: any,
@@ -46,8 +43,6 @@ export class AuthBot extends builder.UniversalBot {
     {
         super(_connector, botSettings);
         this.set("persistConversationData", true);
-
-        this.authState = this.get("authState") as storage.IAuthenticationStateStore;
 
         // Handle generic invokes
         let teamsConnector = this._connector as msteams.TeamsChatConnector;
@@ -68,36 +63,31 @@ export class AuthBot extends builder.UniversalBot {
     // The provider name is in the route, which is defined as "/auth/:provider/callback"
     public async handleOAuthCallback(req: Request, res: Response, providerName: string): Promise<void> {
         const provider = this.botSettings[providerName] as IOAuth2Provider;
-        const state = req.query.state;
+        const stateString = req.query.state as string;
+        const state = JSON.parse(stateString);
         const authCode = req.query.code;
         let verificationCode = "";
 
-        // Load the session from the conversation information, which was stored in the auth state store.
-        // The key is the OAuth state (a randomly-generated GUID).
+        // Load the session from the address information in the OAuth state.
+        // We'll later validate the state to check that it was not forged.
         let session: builder.Session;
         let address: builder.IAddress;
         try {
-            let addressString = await this.authState.getAsync(state);
-            if (addressString) {
-                // Delete the state key, so it can only be used once.
-                await this.authState.deleteAsync(state);
-
-                address = JSON.parse(addressString) as builder.IAddress;
-                session = await utils.loadSessionAsync(this, {
-                    type: "invoke",
-                    agent: "botbuilder",
-                    source: address.channelId,
-                    sourceEvent: {},
-                    address: address,
-                    user: address.user,
-                });
-            }
+            address = state.address as builder.IAddress;
+            session = await utils.loadSessionAsync(this, {
+                type: "invoke",
+                agent: "botbuilder",
+                source: address.channelId,
+                sourceEvent: {},
+                address: address,
+                user: address.user,
+            });
         } catch (e) {
             winston.warn("Failed to get address from OAuth state", e);
         }
 
         if (session &&
-            (utils.getOAuthStateKey(session, providerName) === state) &&        // OAuth state matches what we expect
+            (utils.getOAuthState(session, providerName) === stateString) &&     // OAuth state matches what we expect
             authCode) {                                                         // User granted authorization
             try {
                 // Redeem the authorization code for an access token, and store it provisionally
