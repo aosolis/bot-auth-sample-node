@@ -35,6 +35,8 @@ const accessTokenUrl = "https://login.microsoftonline.com/common/oauth2/token";
 const callbackPath = "/auth/azureADv1/callback";
 const graphProfileUrl = "https://graph.microsoft.com/v1.0/me";
 
+// Example implementation of AzureAD as an identity provider
+// See https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-protocols-oauth-code
 export class AzureADv1Provider implements IOAuth2Provider {
 
     constructor(

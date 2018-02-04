@@ -42,6 +42,8 @@ const authorizationUrl = "https://www.linkedin.com/oauth/v2/authorization";
 const accessTokenUrl = "https://www.linkedin.com/oauth/v2/accessToken";
 const callbackPath = "/auth/linkedIn/callback";
 
+// Example implementation of LinkedIn OAuth2 client
+// See https://developer.linkedin.com/docs/oauth2
 export class LinkedInProvider implements IOAuth2Provider {
 
     constructor(

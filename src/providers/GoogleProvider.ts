@@ -38,6 +38,8 @@ const accessTokenUrl = "https://www.googleapis.com/oauth2/v4/token";
 const callbackPath = "/auth/google/callback";
 const meProfileUrl = "https://people.googleapis.com/v1/people/me";
 
+// Example implementation of Google as an identity provider
+// See https://developers.google.com/identity/protocols/OpenIDConnect
 export class GoogleProvider implements IOAuth2Provider {
 
     constructor(
