@@ -75,6 +75,7 @@ let botSettings = {
     storage: botStorage,
     linkedIn: new providers.LinkedInProvider(config.get("linkedIn.clientId"), config.get("linkedIn.clientSecret")),
     azureADv1: new providers.AzureADv1Provider(config.get("azureAD.appId"), config.get("azureAD.appPassword")),
+    google: new providers.GoogleProvider(config.get("google.clientId"), config.get("google.clientSecret")),
 };
 let bot = new AuthBot(connector, botSettings, app);
 

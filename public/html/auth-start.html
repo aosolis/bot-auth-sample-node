@@ -43,8 +43,9 @@
 
         // Restrict to expected URLs only, so this page isn't used as a springboard to malicious sites
         function isValidAuthorizationUrl(url) {
-            return url.match(/^https:\/\/www\.linkedin\.com\/oauth\/v2\/authorization\?/) ||
-                url.match(/^https:\/\/login\.microsoftonline\.com\/common\/oauth2\/authorize\?/);
+            return url.match(/^https:\/\/www\.linkedin\.com\//) ||
+                url.match(/^https:\/\/login\.microsoftonline\.com\//) ||
+                url.match(/^https:\/\/accounts\.google\.com\//);
         }
 
         let authorizationUrl = queryParams["authorizationUrl"];

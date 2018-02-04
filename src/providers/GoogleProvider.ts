@@ -25,16 +25,18 @@ import * as request from "request";
 import * as config from "config";
 import * as querystring from "querystring";
 let uuidv4 = require("uuid/v4");
-import { AuthorizationUrl, UserToken, IOAuth2Provider } from "./OAuth2Provider";
+import { UserToken, IOAuth2Provider } from "./OAuth2Provider";
 
 // =========================================================
 // Google API
 // =========================================================
 
+export type PersonField = "names" | "emailAddresses" | "photos" | "urls";
+
 const authorizationUrl = "https://accounts.google.com/o/oauth2/v2/auth";
 const accessTokenUrl = "https://www.googleapis.com/oauth2/v4/token";
 const callbackPath = "/auth/google/callback";
-const graphProfileUrl = "https://graph.microsoft.com/v1.0/me";
+const meProfileUrl = "https://people.googleapis.com/v1/people/me";
 
 export class GoogleProvider implements IOAuth2Provider {
 
@@ -50,23 +52,20 @@ export class GoogleProvider implements IOAuth2Provider {
     }
 
     // Return the url the user should navigate to to authenticate the app
-    public getAuthorizationUrl(extraParams?: any): AuthorizationUrl {
+    public getAuthorizationUrl(state: string, extraParams?: any): string {
         let params = {
             response_type: "code",
             response_mode: "query",
-            scope: "openid profile",
+            scope: "openid profile email",
             client_id: this.clientId,
             redirect_uri: config.get("app.baseUri") + callbackPath,
-            resource: "https://graph.microsoft.com",
-            state: uuidv4(),
+            nonce: uuidv4(),
+            state: state,
         } as any;
         if (extraParams) {
             params = { ...extraParams, ...params };
         }
-        return {
-            url: authorizationUrl + "?" + querystring.stringify(params),
-            state: params.state,
-        };
+        return authorizationUrl + "?" + querystring.stringify(params);
     }
 
     // Redeem the authorization code for an access token
@@ -77,7 +76,6 @@ export class GoogleProvider implements IOAuth2Provider {
             client_id: this.clientId,
             client_secret: this.clientSecret,
             redirect_uri: config.get("app.baseUri") + callbackPath,
-            resource: "https://graph.microsoft.com",
         } as any;
 
         return new Promise<UserToken>((resolve, reject) => {
@@ -94,10 +92,10 @@ export class GoogleProvider implements IOAuth2Provider {
         });
     }
 
-    public async getProfileAsync(accessToken: string): Promise<any> {
+    public async getProfileAsync(accessToken: string, personFields: PersonField[] = ["names"]): Promise<any> {
         return new Promise<any>((resolve, reject) => {
             let options = {
-                url: graphProfileUrl,
+                url: `${meProfileUrl}?personFields=${personFields.join(",")}`,
                 json: true,
                 headers: {
                     "Authorization": `Bearer ${accessToken}`,

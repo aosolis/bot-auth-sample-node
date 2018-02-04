@@ -25,6 +25,7 @@ import * as builder from "botbuilder";
 import * as constants from "../constants";
 import { LinkedInDialog } from "./LinkedInDialog";
 import { AzureADv1Dialog } from "./AzureADv1Dialog";
+import { GoogleDialog } from "./GoogleDialog";
 
 // Root dialog provides choices in identity providers
 export class RootDialog extends builder.IntentDialog
@@ -42,8 +43,10 @@ export class RootDialog extends builder.IntentDialog
 
         new LinkedInDialog().register(bot, this);
         new AzureADv1Dialog().register(bot, this);
+        new GoogleDialog().register(bot, this);
         this.matches(/linkedIn/i, constants.DialogId.LinkedIn);
         this.matches(/azureADv1/i, constants.DialogId.AzureADv1);
+        this.matches(/google/i, constants.DialogId.Google);
     }
 
     // Handle resumption of dialog
@@ -79,6 +82,7 @@ export class RootDialog extends builder.IntentDialog
                     builder.CardAction.messageBack(session, "{}", "AzureAD (v1)")
                         .displayText("AzureAD (v1)")
                         .text("AzureADv1"),
+                    builder.CardAction.imBack(session, "Google", "Google"),
                 ]));
         session.send(msg);
     }

@@ -30,6 +30,7 @@ export const invokeType = "invoke";
 export const IdentityProviders = {
     linkedIn: "linkedIn",
     azureADv1: "azureADv1",
+    google: "google",
 };
 
 // Dialog ids
@@ -37,6 +38,7 @@ export const IdentityProviders = {
 export const DialogId = {
     LinkedIn: "LinkedIn",
     AzureADv1: "AzureADv1",
+    Google: "Google",
     Root: "/",
 };
 

@@ -3,3 +3,4 @@
 export * from "./OAuth2Provider";
 export * from "./LinkedInProvider";
 export * from "./AzureADv1Provider";
+export * from "./GoogleProvider";
