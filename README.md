@@ -1,12 +1,14 @@
 # Bot Authentication Sample
 This contains the sample for bot authentication in Microsoft Teams.
 
+
 ## Getting started
 Start by following the setup instructions in the [Microsoft Teams Sample (Node.JS)](https://github.com/OfficeDev/microsoft-teams-sample-complete-node), under [Steps to see the full app in Microsoft Teams](https://github.com/OfficeDev/microsoft-teams-sample-complete-node#steps-to-see-the-full-app-in-microsoft-teams), applying it to the code in this sample. The instructions in that project walk you through the following steps:
 1. Set up a tunneling service such as [ngrok](https://ngrok.com/).
 2. Register a bot in [Microsoft Bot Framework](https://dev.botframework.com/).
 3. Configure the app so it runs as the registered bot.
 4. Create an app manifest (follow the "Manual" instructions) and sideload the app into Microsoft Teams.
+
 
 ## Setup
 
@@ -31,7 +33,14 @@ Registering a bot with the Microsoft Bot Framework automatically creates a corre
 1. Follow the instructions in [Step 1 — Configuring your LinkedIn application](https://developer.linkedin.com/docs/oauth2) to create and configure a LinkedIn application for OAuth 2.
 2. In "Authorized Redirect URLs", add `https://<your_ngrok_url>/auth/linkedIn/callback`.
 3. Note your app's "Client ID" and "Client Secret".
-4. Set `LINKEDIN_CLIENT_ID` = `<your_client_id>`, and `LINKEDIN_CLIENT_SECRET` = `<your_client_secret>`.
+4. Set the environment variables (or equivalent config) `LINKEDIN_CLIENT_ID` = `<your_client_id>`, and `LINKEDIN_CLIENT_SECRET` = `<your_client_secret>`.
+
+### Using Google 
+1. Obtain OAuth2 client credentials from the [Google API Console](https://console.developers.google.com). Enable access to the [Google People API](https://developers.google.com/people/). 
+2. In "Authorized redirect URLs", add `https://<your_ngrok_url>/auth/google/callback`.
+3. Note your app's "Client ID" and "Client Secret".
+4. Set the environment variables (or equivalent config) `GOOGLE_CLIENT_ID` = `<your_client_id>`, and `GOOGLE_CLIENT_SECRET` = `<your_client_secret>`.
+
 
 ## Bot authentication flow
 
