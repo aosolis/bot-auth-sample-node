@@ -53,7 +53,7 @@ Registering a bot with the Microsoft Bot Framework automatically creates a corre
     * **IMPORTANT**: The `state` parameter of the signin URL must contain a unique session token to prevent request forgery attacks. The example uses a randomly-generated UUID.
 4. When the user clicks on the button, Teams opens a popup window and navigates it to the start page.
 5. The start page redirects the user to the identity provider's `authorize` endpoint. ([View code](https://github.com/aosolis/bot-auth-sample-node/blob/a1ed3b2e275afd2afb2de28a93f9db9651d9b5f7/public/html/auth-start.html#L51-L56))
-6. On the identity provider's page, the user signs in an grants access to the bot.
+6. On the identity provider's page, the user signs in and grants access to the bot.
 7. The identity provider takes the user to the bot's OAuth redirect page, with an authorization code.
 8. Bot redeems the authorization code for an access token, and provisionally associates the token with the user that initiated the signin flow.
     * In the example, the bot uses information in the OAuth `state` parameter to determine the user that started the signin process. Before proceeding, it checks the value against the expected `state` value, to detect forged requests. ([View code](https://github.com/aosolis/bot-auth-sample-node/blob/a1ed3b2e275afd2afb2de28a93f9db9651d9b5f7/src/AuthBot.ts#L62-L91))
@@ -63,7 +63,7 @@ Registering a bot with the Microsoft Bot Framework automatically creates a corre
 11. Bot checks the incoming verification code against the code stored in the user's provisional token. ([View code](https://github.com/aosolis/bot-auth-sample-node/blob/a1ed3b2e275afd2afb2de28a93f9db9651d9b5f7/src/dialogs/BaseIdentityDialog.ts#L140-L153))
 12. If they match, bot marks the token as validated and ready for use. Otherwise, the auth flow fails, and it deletes the provisional token.
 
-## Mobile devices
+### Mobile clients
 As of February 2018, the Microsoft Teams mobile clients do not fully support the `signin` action protocol.
 * If the URL provided to the `signin` action has a `fallbackUrl` query string parameter, Teams will launch that URL in the browser.
 * Otherwise, Teams will show an error saying that the action is not yet supported on mobile.

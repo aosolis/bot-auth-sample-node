@@ -54,6 +54,14 @@ export class AuthBot extends builder.UniversalBot {
                 cb(e, null, 500);
             }
         });
+        teamsConnector.onSigninStateVerification(async (event, query, cb) => {
+            try {
+                await this.onInvoke(event, cb);
+            } catch (e) {
+                winston.error("Signin state verification handler failed", e);
+                cb(e, null, 500);
+            }
+        });
 
         // Register dialogs
         new RootDialog().register(this);

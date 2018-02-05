@@ -95,25 +95,12 @@ export abstract class BaseIdentityDialog extends builder.IntentDialog
     private async onMessageReceived(session: builder.Session): Promise<void> {
         let messageAsAny = session.message as any;
         if (messageAsAny.originalInvoke) {
-            // This was originally an invoke message
+            // This was originally an invoke message, see if it is signin/verifyState
             let event = messageAsAny.originalInvoke;
             if (event.name === "signin/verifyState") {
                 await this.handleLoginCallback(session);
             } else {
-                let payload = event.value;
-                switch (payload.command) {
-                    case "profile":
-                        await this.showUserProfile(session);
-                        break;
-
-                    case "logout":
-                        await this.handleLogout(session);
-                        break;
-
-                    case "login":
-                        await this.handleLogin(session);
-                        break;
-                }
+                console.warn(`Received unrecognized invoke "${event.name}"`);
             }
         } else {
             // See if we are waiting for a verification code and got one
