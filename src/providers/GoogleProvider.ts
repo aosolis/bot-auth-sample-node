@@ -21,7 +21,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import * as request from "request";
+import * as request from "request-promise";
 import * as config from "config";
 import * as querystring from "querystring";
 let uuidv4 = require("uuid/v4");
@@ -80,36 +80,21 @@ export class GoogleProvider implements IOAuth2Provider {
             redirect_uri: config.get("app.baseUri") + callbackPath,
         } as any;
 
-        return new Promise<UserToken>((resolve, reject) => {
-            request.post({ url: accessTokenUrl, form: params, json: true }, (err, response, body) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve({
-                        accessToken: body.access_token,
-                        expirationTime: body.expires_on * 1000,
-                    });
-                }
-            });
-        });
+        let responseBody = await request.post({ url: accessTokenUrl, form: params, json: true });
+        return {
+            accessToken: responseBody.access_token,
+            expirationTime: responseBody.expires_on * 1000,
+        };
     }
 
     public async getProfileAsync(accessToken: string, personFields: PersonField[] = ["names"]): Promise<any> {
-        return new Promise<any>((resolve, reject) => {
-            let options = {
-                url: `${meProfileUrl}?personFields=${personFields.join(",")}`,
-                json: true,
-                headers: {
-                    "Authorization": `Bearer ${accessToken}`,
-                },
-            };
-            request.get(options, (err, response, body) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(body);
-                }
-            });
-        });
+        let options = {
+            url: `${meProfileUrl}?personFields=${personFields.join(",")}`,
+            json: true,
+            headers: {
+                "Authorization": `Bearer ${accessToken}`,
+            },
+        };
+        return await request.get(options);
     }
 }

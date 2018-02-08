@@ -21,7 +21,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import * as request from "request";
+import * as request from "request-promise";
 import * as config from "config";
 import * as querystring from "querystring";
 import { UserToken, IOAuth2Provider } from "./OAuth2Provider";
@@ -82,41 +82,26 @@ export class LinkedInProvider implements IOAuth2Provider {
             redirect_uri: config.get("app.baseUri") + callbackPath,
         } as any;
 
-        return new Promise<UserToken>((resolve, reject) => {
-            request.post({ url: accessTokenUrl, form: params, json: true }, (err, response, body) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve({
-                        accessToken: body.access_token,
-                        expirationTime: Date.now() + (body.expires_in * 1000),
-                    });
-                }
-            });
-        });
+        let responseBody = await request.post({ url: accessTokenUrl, form: params, json: true });
+        return {
+            accessToken: responseBody.access_token,
+            expirationTime: Date.now() + (responseBody.expires_in * 1000),
+        };
     }
 
     public async getProfileAsync(accessToken: string, fields?: ProfileField[]): Promise<any> {
-        return new Promise<any>((resolve, reject) => {
-            let fieldsString = "";
-            if (fields && fields.length) {
-                fieldsString = `:(${fields.join(",")})`;
-            }
+        let fieldsString = "";
+        if (fields && fields.length) {
+            fieldsString = `:(${fields.join(",")})`;
+        }
 
-            let options = {
-                url: `${apiBaseUrl}/people/~${fieldsString}?format=json`,
-                json: true,
-                headers: {
-                    "Authorization": `Bearer ${accessToken}`,
-                },
-            };
-            request.get(options, (err, response, body) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(body);
-                }
-            });
-        });
+        let options = {
+            url: `${apiBaseUrl}/people/~${fieldsString}?format=json`,
+            json: true,
+            headers: {
+                "Authorization": `Bearer ${accessToken}`,
+            },
+        };
+        return await request.get(options);
     }
 }
