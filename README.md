@@ -1,6 +1,5 @@
-# Bot Authentication Sample
-This contains the sample for bot authentication in Microsoft Teams.
-
+# Microsoft Teams Authentication Sample
+This sample demonstrates authentication in Microsoft Teams apps. 
 
 ## Getting started
 Start by following the setup instructions in the [Microsoft Teams Sample (Node.JS)](https://github.com/OfficeDev/microsoft-teams-sample-complete-node), under [Steps to see the full app in Microsoft Teams](https://github.com/OfficeDev/microsoft-teams-sample-complete-node#steps-to-see-the-full-app-in-microsoft-teams), applying it to the code in this sample. The instructions in that project walk you through the following steps:
@@ -11,8 +10,7 @@ Start by following the setup instructions in the [Microsoft Teams Sample (Node.J
 
 
 ## Setup
-
-The sample shows authentication against different identity providers. To be able to use an identity provider, first you will have to register your application with it.
+To be able to use an identity provider, first you have to register your application.
 
 ### Changing app settings
 This project uses the [config](https://www.npmjs.com/package/config) package. The default configuration is in `config\default.json`.
@@ -25,7 +23,8 @@ The instructions below assume that you're using environment variables to configu
 Registering a bot with the Microsoft Bot Framework automatically creates a corresponding Azure AD application with the same name and ID. 
 1. Go to the [Application Registration Portal](https://apps.dev.microsoft.com) and sign in with the same account that you used to register your bot.
 2. Find your application in the list and click on the name to edit.
-3. Click on "Add platform", choose "Web", then add the following redirect URL: `https://<your_ngrok_url>/auth/azureADv1/callback`.
+3. Click on "Add platform", choose "Web", then add the following redirect URLs:
+     * `https://<your_ngrok_url>/auth/azureADv1/callback`
 4. Scroll to the bottom of the page and click on "Save".
 5. The bot uses `MICROSOFT_APP_ID` and `MICROSOFT_APP_PASSWORD`, so these should already be set. No further changes needed!
 
@@ -43,13 +42,13 @@ Registering a bot with the Microsoft Bot Framework automatically creates a corre
 
 
 ## Bot authentication flow
-
 ![Bot auth sequence diagram](https://aosolis.github.io/bot-auth/bot_auth_sequence.png)
 
 1. The user sends a message to the bot.
 2. The bot determines if the user needs to sign in.
     * In the example, the bot stores the access token in its user data store. It asks the user to log in if it doesn't have a validated token for the selected identity provider. ([View code](https://github.com/aosolis/bot-auth-sample-node/blob/a1ed3b2e275afd2afb2de28a93f9db9651d9b5f7/src/dialogs/BaseIdentityDialog.ts#L168))
-3. The bot constructs the URL to the start page of the auth flow, and sends a card to the user with a `signin` action. Like other Teams application auth flows, the start page must be on a domain that's in the `validDomains` list, and on the same domain as the OAuth redirect page. ([View code](https://github.com/aosolis/bot-auth-sample-node/blob/a1ed3b2e275afd2afb2de28a93f9db9651d9b5f7/src/dialogs/BaseIdentityDialog.ts#L173-L191))
+3. The bot constructs the URL to the start page of the auth flow, and sends a card to the user with a `signin` action. ([View code](https://github.com/aosolis/bot-auth-sample-node/blob/a1ed3b2e275afd2afb2de28a93f9db9651d9b5f7/src/dialogs/BaseIdentityDialog.ts#L173-L191))
+    * Like other application auth flows in Teams, the start page must be on a domain that's in your `validDomains` list, and on the same domain as the post-login redirect page.
     * **IMPORTANT**: If you are using OAuth, remember that the `state` parameter in the authentication request must contain a unique session token to prevent request forgery attacks. The example uses a randomly-generated GUID.
 4. When the user clicks on the button, Teams opens a popup window and navigates it to the start page.
 5. The start page redirects the user to the identity provider's `authorize` endpoint. ([View code](https://github.com/aosolis/bot-auth-sample-node/blob/a1ed3b2e275afd2afb2de28a93f9db9651d9b5f7/public/html/auth-start.html#L51-L56))
