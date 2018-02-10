@@ -28,7 +28,6 @@ let bodyParser = require("body-parser");
 let favicon = require("serve-favicon");
 let http = require("http");
 let path = require("path");
-let logger = require("morgan");
 import * as config from "config";
 import * as builder from "botbuilder";
 import * as msteams from "botbuilder-teams";
@@ -40,7 +39,6 @@ import { AuthBot } from "./AuthBot";
 let app = express();
 
 app.set("port", process.env.PORT || 3978);
-app.use(logger("dev"));
 app.use(express.static(path.join(__dirname, "../../public")));
 app.use(favicon(path.join(__dirname, "../../public/assets", "favicon.ico")));
 app.use(bodyParser.json());

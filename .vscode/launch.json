@@ -39,6 +39,8 @@
                 "MICROSOFT_APP_PASSWORD": "MICROSOFT_APP_PASSWORD",
                 "LINKEDIN_CLIENT_ID": "LINKEDIN_CLIENT_ID",
                 "LINKEDIN_CLIENT_SECRET": "LINKEDIN_CLIENT_SECRET",
+                "GOOGLE_CLIENT_ID": "GOOGLE_CLIENT_ID",
+                "GOOGLE_CLIENT_SECRET": "GOOGLE_CLIENT_ID",
                 "NODE_DEBUG": "botbuilder",
                 "http_proxy": "http://localhost:8888",
                 "no_proxy": "login.microsoftonline.com",
